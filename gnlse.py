@@ -124,6 +124,6 @@ def perform_simulation( simp, inifield):
         zvec.append(integr.t)        
         tf = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
         ferg.append(tf)
-        ferg2.append(np.fft.fftshift(tf))/simp['dt']
+        ferg2.append(np.fft.fftshift(tf)/simp['dt'])
     terg =np.fft.fft(ferg)
     return terg, ferg2,zvec
