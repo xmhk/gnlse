@@ -22,11 +22,12 @@ def prepare_sim_params( alpha,
                         zpoints = 256):
     ###
     dt0 = centerwavelength / ( 2.0 * 2.99792458e8) #nyquist
-    om0 = 2.0 * np.pi * 2.99792458e8 / centerwavelength
+    om0 = 2.0 * np.pi * 2.99792458e8 / centerwavelength    
     dt = tempspread * dt0
     points = 2**N
     tvec = np.arange( -points/2, points/2) * dt
     relomvec = 2 * np.pi * np.arange (-points/2, points/2)/(points * dt)
+    omvec = relomvec + om0
     if len(betas) == points: # betas as full dispersion vector
         linop = 1.0j * betas
     else: # betas as taylor coefficients
@@ -41,11 +42,13 @@ def prepare_sim_params( alpha,
   
     dz = length/zpoints    # z-steps
     ###
-    Retval = {}
+    Retval = {}    
     Retval['dt']=dt
     Retval['points']=points
     Retval['tvec']=tvec
     Retval['relomvec']=relomvec
+    Retval['om0'] = om0
+    Retval['omvec']=omvec
     Retval['raman']=raman
     Retval['shock']=shock
     Retval['gamma']=gamma
