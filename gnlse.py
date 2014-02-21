@@ -102,11 +102,12 @@ def prepare_integrator(simp, inifield):
     return integrator
 
 def instatus( aktl, slength, t1 ):
-    t2 = time()    
     frac =  aktl/slength
-    tel = t2-t1
-    trem = (1-frac)*tel/frac
-    print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
+    if frac>0.0:
+        t2 = time()    
+        tel = t2-t1        
+        trem = (1-frac)*tel/frac
+        print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
     
 def perform_simulation( simp, inifield):  
     integr = prepare_integrator( simp, inifield)
