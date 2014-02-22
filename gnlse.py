@@ -6,6 +6,20 @@ from functools import partial as funcpartial
 from scipy.integrate import complex_ode
 from time import time
 
+
+
+def ramanrespf(tvec):
+    """
+    temporal raman response function 
+    """  
+    tau1 = 12.2e-15
+    tau2 = 32.0e-15
+    rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec/tau2), np.sin(tvec/tau1))
+    rt = np.multiply( rt, tvec>=0)
+    return rt
+
+
+
 def prepare_sim_params( alpha,
                         betas ,
                         centerwavelength,                        
@@ -20,7 +34,15 @@ def prepare_sim_params( alpha,
                         abstol = 1e-9,
                         integratortype = 'vode',
                         zpoints = 256):
-    ###
+    """
+    prepare_sim_params
+    
+    creates a dict containing all information necessary for 
+    simulation.
+    """
+    # -------------------------------------------------------
+    # COMPUTATION GRID
+    # -------------------------------------------------------
     dt0 = centerwavelength / ( 2.0 * 2.99792458e8) #nyquist
     om0 = 2.0 * np.pi * 2.99792458e8 / centerwavelength    
     dt = tempspread * dt0
@@ -28,12 +50,20 @@ def prepare_sim_params( alpha,
     tvec = np.arange( -points/2, points/2) * dt
     relomvec = 2 * np.pi * np.arange (-points/2, points/2)/(points * dt)
     omvec = relomvec + om0
-    if len(betas) == points: # betas as full dispersion vector
+    dz = length/zpoints    
+    # -------------------------------------------------------
+    # LINEAR OPERATOR: dispersion and losses 
+    # -------------------------------------------------------
+    if len(betas) == points: # dispersion curve as vector
         linop = 1.0j * betas
-    else: # betas as taylor coefficients
+    else:                    # dispersion via taylor coefficients
         bk = beta0_curve( relomvec, 0, betas)
         linop = 1.0j * bk
-  
+    linop += alpha/2.        # loss 
+    linop = np.fft.fftshift(linop)
+    # -------------------------------------------------------
+    # SHOCK TERM: self-steepening
+    # -------------------------------------------------------
     if shock==False:  # self-steepening off
         W = 1.0
     else:             # self-steepening on
@@ -46,11 +76,15 @@ def prepare_sim_params( alpha,
         W = omvec / om0
         #
         W = np.fft.fftshift(W)
-    linop += alpha/2.        # loss 
-    linop = np.fft.fftshift(linop)
-  
-    dz = length/zpoints    # z-steps
-    ###
+    # -------------------------------------------------------
+    # Raman response function
+    # -------------------------------------------------------
+    RT = ramanrespf( tvec )
+    RW = points*np.fft.ifft(np.fft.fftshift(RT)) 
+
+    # -------------------------------------------------------
+    # PREPARE OUTPUT DICTIONARY
+    # -------------------------------------------------------
     Retval = {}    
     Retval['dt']=dt
     Retval['points']=points
@@ -59,6 +93,8 @@ def prepare_sim_params( alpha,
     Retval['om0'] = om0
     Retval['omvec']=omvec
     Retval['raman']=raman
+    Retval['fr']=fr
+    Retval['RW'] = RW
     Retval['shock']=shock
     Retval['gamma']=gamma
     Retval['linop']=linop
@@ -72,33 +108,9 @@ def prepare_sim_params( alpha,
     return Retval
 
 
-def GNLSE_RHS( z, AW, simp):
-    """
-    GNLSE_RHS
-    solve the generalized Nonlinear Schroedinger equation
-    this is derived from the RK4IP matlab script provided in
-    "Supercontinuum Generation in Optical Fibers" Edited by J. M. Dudley and J. R. Taylor (Cambridge 2010).
-    see http://scgbook.info/ for the original script.    
-    """
-    
-    AT = np.fft.fft( np.multiply( AW , np.exp( simp['linop'] * z)))
-    IT = np.abs(AT)**2
-    if simp['raman'] == True:
-        print( "dummy")
-    else:
-        M = np.fft.ifft( np.multiply( AT, IT))
-
-#    if len(simp.RT)==1 or np.abs(fr)==0:
-    #if np.abs(simp.fr)==0:
-    #    M = np.fft.ifft( np.multiply( AT, IT))
-
-    #else:
-    #    RS = simp.dt * simp.fr * np.fft.fft(   np.multiply ( np.fft.ifft(IT), simp.RW))
-    #    M = np.fft.ifft( np.multiply( AT, (1-self.fr)*IT ) + RS)
-    return  1.0j * simp['gamma'] * np.multiply( simp['W'], np.multiply( M, np.exp( -simp['linop'] * z)) )
 
 def prepare_integrator(simp, inifield):
-    simpsub = dict( (k, simp[k]) for k in ('gamma','raman','linop','W','dz'))
+    simpsub = dict( (k, simp[k]) for k in ('gamma','raman','linop','W','dz','dt','RW','fr'))
         # the line below creates a new function handle as some the scipy integrator functions
         # seem not to wrap additional parameters (simp in this case) of the RHS function 
         # correctly  (as SCIPY 0.14.0.dev-a3e9c7f)
@@ -109,6 +121,31 @@ def prepare_integrator(simp, inifield):
     integrator.set_integrator(simp['integratortype'], atol=simp['abstol'],rtol=simp['reltol'])
     integrator.set_initial_value(np.fft.ifft( inifield))
     return integrator
+
+
+def GNLSE_RHS( z, AW, simp):
+    """
+    GNLSE_RHS
+    solve the generalized Nonlinear Schroedinger equation
+    this is derived from the RK4IP matlab script provided in
+    "Supercontinuum Generation in Optical Fibers" edited
+    by J. M. Dudley and J. R. Taylor (Cambridge 2010).
+    see http://scgbook.info/ for the original script.    
+    """    
+    AT = np.fft.fft( np.multiply( AW , np.exp( simp['linop'] * z)))
+    IT = np.abs(AT)**2  
+
+    if simp['raman'] == True:
+        RS = simp['dt']  *  np.fft.fft( np.multiply( np.fft.ifft(IT), simp['RW'] ))
+        M = np.fft.ifft( np.multiply( AT, 
+                                      ( (1-simp['fr'])*IT +  simp['fr'] *  RS  )
+                                     )
+                        )      
+    else:
+        M = np.fft.ifft( np.multiply( AT, IT))
+
+    return  1.0j * simp['gamma'] * np.multiply( simp['W'], np.multiply( M, np.exp( -simp['linop'] * z)) )
+
 
 def instatus( aktl, slength, t1 ):
     frac =  aktl/slength
