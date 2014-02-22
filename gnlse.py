@@ -16,8 +16,8 @@ def prepare_sim_params( alpha,
                         fr=0.18,                        
                         raman = False,
                         shock = False,
-                        reltol = 1e-5,
-                        abstol = 1e-5,
+                        reltol = 1e-9,
+                        abstol = 1e-9,
                         integratortype = 'vode',
                         zpoints = 256):
     ###
@@ -33,10 +33,19 @@ def prepare_sim_params( alpha,
     else: # betas as taylor coefficients
         bk = beta0_curve( relomvec, 0, betas)
         linop = 1.0j * bk
-    if shock==False:   # self steepening - FIXIT
+  
+    if shock==False:  # self-steepening off
         W = 1.0
-    else:              # self steepening - FIXIT
-        W = 1.0
+    else:             # self-steepening on
+        #gamma = gamma/om0   # <- original dudley
+        #W = relomvec + om0  # <- original dudley
+        #
+        # i prefer the version below rather than
+        # changing the gamma parameter
+        # it should give the same results
+        W = omvec / om0
+        #
+        W = np.fft.fftshift(W)
     linop += alpha/2.        # loss 
     linop = np.fft.fftshift(linop)
   
@@ -75,7 +84,7 @@ def GNLSE_RHS( z, AW, simp):
     AT = np.fft.fft( np.multiply( AW , np.exp( simp['linop'] * z)))
     IT = np.abs(AT)**2
     if simp['raman'] == True:
-        print "dummy"
+        print( "dummy")
     else:
         M = np.fft.ifft( np.multiply( AT, IT))
 
