@@ -1,11 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from optictools import beta0_curve
 from functools import partial as funcpartial
+from scipy.misc import factorial
 from scipy.integrate import complex_ode
 from time import time
 
+
+
+def beta0_curve(omvec, om0, betas):
+    """
+    calculate the dispersion curve via Taylor coefficients
+    """
+    bc = np.zeros(len(omvec))
+    for i in range(len(betas)):
+        bc = bc + betas[i]/factorial(i) * (omvec-om0)**i
+    return bc
 
 
 def ramanrespf(tvec):
