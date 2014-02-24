@@ -5,7 +5,7 @@ from functools import partial as funcpartial
 from scipy.misc import factorial
 from scipy.integrate import complex_ode
 from time import time
-
+import scipy.io as sio
 
 
 def beta0_curve(omvec, om0, betas):
@@ -102,6 +102,7 @@ def prepare_sim_params( alpha,
     Retval['relomvec']=relomvec
     Retval['om0'] = om0
     Retval['omvec']=omvec
+    Retval['dom'] = omvec[2]-omvec[1]
     Retval['raman']=raman
     Retval['fr']=fr
     Retval['RW'] = RW
@@ -174,12 +175,49 @@ def perform_simulation( simp, inifield):
     slength = simp['length']
     zvec.append(0)
     ferg.append(np.fft.ifft( inifield))
+    #
+    # the fft scalingfactor ensures that the energy is conserved in both domains
+    #
+    scalefak = np.sqrt( simp['dt'] / simp['dom'] * simp['points'] )
+    ferg2.append(np.fft.fftshift(np.fft.ifft( inifield)) *scalefak)
     for i in range(simp['zpoints']):
         instatus( integr.t, slength, t1)
         integr.integrate(integr.t + simp['dz'])
         zvec.append(integr.t)        
         tf = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
         ferg.append(tf)
-        ferg2.append(np.fft.fftshift(tf)/simp['dt'])
+        ferg2.append(np.fft.fftshift(tf) * scalefak)
     terg =np.fft.fft(ferg)
-    return terg, ferg2,zvec
+    return terg, np.array( ferg2) ,zvec
+
+
+
+
+
+def saveoutput(tf,ff,zv, simparams):
+    outputdict = {}
+    outputdict['tvec'] = simparams['tvec']
+    outputdict['omvec']=simparams['omvec']
+    outputdict['relomvec']=simparams['relomvec']
+    outputdict['om0'] = simparams['om0']
+    outputdict['length']=simparams['length']
+    outputdict['zpoints']=simparams['zpoints']
+    outputdict['points']=simparams['points']
+    
+    outputdict['timefield']=tf
+    outputdict['freqfield']=ff
+    outputdict['zvec']=zv
+
+    outputdict['tfield1'] = tf[0,:]
+    outputdict['ffield1'] = ff[0,:]
+    outputdict['tfield2'] = tf[simparams['zpoints'],:]
+    outputdict['ffield2'] = ff[simparams['zpoints'],:]
+    sio.savemat( 'test.mat',outputdict)
+
+def loadoutput(filename):
+    d = sio.loadmat(filename)
+    for k in d.keys():
+        if k not in ('__header__','__globals__','__version__'):
+            print k
+            d[k]=d[k][0]
+    return d
