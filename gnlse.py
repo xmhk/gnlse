@@ -194,7 +194,7 @@ def perform_simulation( simp, inifield):
 
 
 
-def saveoutput(tf,ff,zv, simparams):
+def saveoutput(filename, tf,ff,zv, simparams):
     outputdict = {}
     outputdict['tvec'] = simparams['tvec']
     outputdict['omvec']=simparams['omvec']
@@ -212,7 +212,7 @@ def saveoutput(tf,ff,zv, simparams):
     outputdict['ffield1'] = ff[0,:]
     outputdict['tfield2'] = tf[simparams['zpoints'],:]
     outputdict['ffield2'] = ff[simparams['zpoints'],:]
-    sio.savemat( 'test.mat',outputdict)
+    sio.savemat( filename , outputdict)
 
 def loadoutput(filename):
     d = sio.loadmat(filename)
