@@ -97,7 +97,7 @@ def self_steepening():
 
 
 def higher_order_soliton(Nsol):
-    beta2 = -10.0e-27 #no dispersion
+    beta2 = -10.0e-27
     betas = [0,0,beta2]
     gamma = 2.100000e-02
     T0 = .250e-12
@@ -130,6 +130,8 @@ def higher_order_soliton(Nsol):
 # choose between different demos
 # -------------------------------------------------------
 
-#ramanshift_long()
-#self_steepening()
-higher_order_soliton(4.0)
+
+if __name__=='__main__':
+    #ramanshift_long()
+    #self_steepening()
+    higher_order_soliton(4.0)
