@@ -13,7 +13,7 @@ and J.M. Dudley that is provided in  "Supercontinuum Generation in Optical
 
   * SPM & GVD (higher order soliton)
   * self-steepening
-  * there are still issued in terms of Raman-Effekt (scaling due 
-    to numpy's implementation of ifft/fft?
+  * there are still issues considering the Raman-Effekt (scaling, maybe due 
+    to numpy's implementation of ifft/fft)?
 
 
