@@ -40,7 +40,8 @@ def prepare_sim_params( alpha,
                         fr=0.18,                        
                         raman = False,
                         shock = False,
-                        reltol = 1e-9,
+                        nsteps = 500,
+                        reltol = 1e-6,
                         abstol = 1e-9,
                         integratortype = 'vode',
                         zpoints = 256):
@@ -115,6 +116,7 @@ def prepare_sim_params( alpha,
     Retval['zpoints']=zpoints    
     Retval['reltol']=reltol
     Retval['abstol']=abstol
+    Retval['nsteps']=nsteps
     Retval['integratortype']=integratortype
     return Retval
 
@@ -129,7 +131,7 @@ def prepare_integrator(simp, inifield):
     integrator = complex_ode(GNLSE_RHS2)
         # available types  dop853   dopri5   lsoda    vode
         # zvode also available, but do not use, as complex ode handling already wrapped above
-    integrator.set_integrator(simp['integratortype'], atol=simp['abstol'],rtol=simp['reltol'])
+    integrator.set_integrator(simp['integratortype'], atol=simp['abstol'],rtol=simp['reltol'],nsteps=simp['nsteps'])
     integrator.set_initial_value(np.fft.ifft( inifield))
     return integrator
 
@@ -219,5 +221,5 @@ def loadoutput(filename):
     for k in d.keys():
         if k not in ('__header__','__globals__','__version__'):
             print k
-            d[k]=d[k][0]
+            d[k]=d[k][0] #sio reconstructs cascaded arrays (somhow)
     return d
