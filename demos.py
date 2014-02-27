@@ -124,6 +124,7 @@ def higher_order_soliton(Nsol):
     inifield = np.sqrt(P) * 1.0 / np.cosh( simparams['tvec']/T0) #higher order soliton
 
     tf,ff,zv = perform_simulation( simparams, inifield)
+    saveoutput('testoutput.mat', tf, ff, zv, simparams)
     helperpolot( tf,ff,simparams)
 
 # -------------------------------------------------------

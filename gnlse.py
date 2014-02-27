@@ -67,6 +67,7 @@ def prepare_sim_params( alpha,
     # -------------------------------------------------------
     if len(betas) == points: # dispersion curve as vector
         linop = 1.0j * betas
+        bk = betas           # store for later use
     else:                    # dispersion via taylor coefficients
         bk = beta0_curve( relomvec, 0, betas)
         linop = 1.0j * bk
@@ -110,6 +111,7 @@ def prepare_sim_params( alpha,
     Retval['shock']=shock
     Retval['gamma']=gamma
     Retval['linop']=linop
+    Retval['betacurve'] = bk
     Retval['length']=length
     Retval['W'] = W
     Retval['dz']=dz
@@ -202,6 +204,7 @@ def saveoutput(filename, tf,ff,zv, simparams):
     outputdict['omvec']=simparams['omvec']
     outputdict['relomvec']=simparams['relomvec']
     outputdict['om0'] = simparams['om0']
+    outputdict['betacurve'] = simparams['betacurve']
     outputdict['length']=simparams['length']
     outputdict['zpoints']=simparams['zpoints']
     outputdict['points']=simparams['points']
