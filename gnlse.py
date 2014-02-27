@@ -219,7 +219,7 @@ def saveoutput(filename, tf,ff,zv, simparams):
 def loadoutput(filename):
     d = sio.loadmat(filename)
     for k in d.keys():
-        if k not in ('__header__','__globals__','__version__'):
-            print k
-            d[k]=d[k][0] #sio reconstructs cascaded arrays (somhow)
+        if k not in ('__header__','__globals__','__version__','timefield','freqfield'):
+            #print k
+            d[k]=d[k][0] #sio reconstructs cascaded arrays of (0,1)-arrays (somhow)    
     return d
