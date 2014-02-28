@@ -26,7 +26,12 @@ def ramanrespf(tvec):
     """  
     tau1 = 12.2e-15
     tau2 = 32.0e-15
-    rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec/tau2), np.sin(tvec/tau1))
+    tvec2 = np.multiply( tvec, tvec>=0) # using tvec2 prevents numerical issues for big negative times with exp   
+    rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec2/tau2), np.sin(tvec2/tau1))
+    #
+    # original version:
+    # the line below is numerically unstable (invalid values may occur in exp(-big number)
+    #rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec/tau2), np.sin(tvec/tau1))
     rt = np.multiply( rt, tvec>=0)
     return rt
 
