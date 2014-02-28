@@ -196,7 +196,9 @@ def perform_simulation( simp, inifield):
 
 
 
-
+#
+# input and output
+#
 
 def saveoutput(filename, tf,ff,zv, simparams):
     outputdict = {}
@@ -226,3 +228,30 @@ def loadoutput(filename):
             #print k
             d[k]=d[k][0] #sio reconstructs cascaded arrays of (0,1)-arrays (somhow)    
     return d
+
+
+def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as evolution in one figure
+    if 'fignr' in zparams.keys():
+        plt.figure(zparams['fignr'])
+    else:
+        plt.figure(99)
+    plt.subplot(221)
+    plt.plot( d['tvec'], np.abs(d['tfield2'])**2)
+    plt.plot( d['tvec'], np.abs(d['tfield1'])**2,linewidth=3)
+    plt.legend(["out","in"])
+
+
+    plt.subplot(222)
+    plt.plot( d['omvec'], db_abs2( d['ffield2']))
+    plt.plot( d['omvec'], db_abs2( d['ffield1']),linewidth=3)
+    plt.legend(["out","in"])
+
+    plt.subplot(223)
+    plt.imshow( np.abs(d['timefield'])**2,aspect='auto',origin='lower')
+    plt.colorbar()
+
+    plt.subplot(224)
+    ax=plt.imshow( db_abs2(d['freqfield']),aspect='auto',origin='lower')
+    plt.colorbar()
+    if 'clim' in zparams.keys():
+        ax.set_clim(zparams['clim'])
