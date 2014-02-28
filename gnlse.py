@@ -6,6 +6,8 @@ from scipy.misc import factorial
 from scipy.integrate import complex_ode
 from time import time
 import scipy.io as sio
+from matplotlib import pyplot as plt #you only need this for 'inoutplot'
+from optictools import db_abs, db_abs2 # like matplotlib, optictools can be found on github/xmhk
 
 
 def beta0_curve(omvec, om0, betas):
