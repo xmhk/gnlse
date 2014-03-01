@@ -249,16 +249,26 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
 
 
     plt.subplot(222)
-    plt.plot( d['omvec'], db_abs2( d['ffield2']))
-    plt.plot( d['omvec'], db_abs2( d['ffield1']),linewidth=3)
+    plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield2']))
+    plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield1']),linewidth=3)
+    if 'fylim' in zparams.keys():
+        plt.ylim(zparams['fylim'])
     plt.legend(["out","in"])
-
+    print zparams.keys()
     plt.subplot(223)
-    plt.imshow( np.abs(d['timefield'])**2,aspect='auto',origin='lower')
+    plt.imshow( np.abs(d['timefield'])**2,
+                aspect='auto',
+                origin='lower',
+                extent=( np.min(d['tvec']), np.max(d['tvec']),
+                         np.min(d['zvec']), np.max(d['zvec'])))
     plt.colorbar()
 
     plt.subplot(224)
-    ax=plt.imshow( db_abs2(d['freqfield']),aspect='auto',origin='lower')
+    ax=plt.imshow( db_abs2(d['freqfield']),
+                   aspect='auto',
+                   origin='lower',
+                    extent=( np.min(d['omvec'])/2.0/np.pi, np.max(d['omvec'])/2.0/np.pi,
+                         np.min(d['zvec']), np.max(d['zvec'])))
     plt.colorbar()
     if 'clim' in zparams.keys():
         ax.set_clim(zparams['clim'])
