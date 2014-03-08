@@ -10,32 +10,6 @@ from matplotlib import pyplot as plt #you only need this for 'inoutplot'
 from optictools import db_abs, db_abs2 # like matplotlib, optictools can be found on github/xmhk
 
 
-def beta0_curve(omvec, om0, betas):
-    """
-    calculate the dispersion curve via Taylor coefficients
-    """
-    bc = np.zeros(len(omvec))
-    for i in range(len(betas)):
-        bc = bc + betas[i]/factorial(i) * (omvec-om0)**i
-    return bc
-
-
-def ramanrespf(tvec):
-    """
-    temporal raman response function 
-    """  
-    tau1 = 12.2e-15
-    tau2 = 32.0e-15
-    tvec2 = np.multiply( tvec, tvec>=0) # using tvec2 prevents numerical issues for big negative times with exp   
-    rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec2/tau2), np.sin(tvec2/tau1))
-    #
-    # original version:
-    # the line below is numerically unstable (invalid values may occur in exp(-big number)
-    #rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec/tau2), np.sin(tvec/tau1))
-    rt = np.multiply( rt, tvec>=0)
-    return rt
-
-
 
 def prepare_sim_params( alpha,
                         betas ,
@@ -44,13 +18,14 @@ def prepare_sim_params( alpha,
                         length,
                         N, 
                         tempspread=1.0,
-                        fr=0.18,                        
                         raman = False,
+                        ramantype = 'hollenbeck',  #or  'blowwood', 'linagrawal'
+                        fr=0.2,                    #      0.18          0.245    
                         shock = False,
                         nsteps = 500,
                         reltol = 1e-6,
                         abstol = 1e-9,
-                        integratortype = 'vode',
+                        integratortype = 'dopri5',
                         zpoints = 256):
     """
     prepare_sim_params
@@ -58,6 +33,7 @@ def prepare_sim_params( alpha,
     creates a dict containing all information necessary for 
     simulation.
     """
+
     # -------------------------------------------------------
     # COMPUTATION GRID
     # -------------------------------------------------------
@@ -98,7 +74,18 @@ def prepare_sim_params( alpha,
     # -------------------------------------------------------
     # Raman response function
     # -------------------------------------------------------
-    RT = ramanrespf( tvec )
+    if raman==True:
+        if ramantype.lower() in ['blowwood','linagrawal','hollenbeck']:
+            print("Raman response type : %s"%ramantype)
+    if ramantype=='blowwood':
+        RT=raman_blowwood(tvec)
+    elif ramantype=='linagrawal':
+        RT= raman_linagrawal( tvec )
+    elif ramantype=='hollenbeck':
+        RT= raman_hollenbeck( tvec )
+    else:
+        print("\n\nValue Error: ramantype has to be 'blowwood', 'linagrawal' or 'hollenbeck'\n\n")
+        raise ValueError()
     RW = points*np.fft.ifft(np.fft.fftshift(RT)) 
 
     # -------------------------------------------------------
@@ -132,6 +119,10 @@ def prepare_sim_params( alpha,
 
 
 def prepare_integrator(simp, inifield):
+    """ 
+    prepare an integration scipy can understand 
+    """
+
     simpsub = dict( (k, simp[k]) for k in ('gamma','raman','linop','W','dz','dt','RW','fr'))
         # the line below creates a new function handle as some the scipy integrator functions
         # seem not to wrap additional parameters (simp in this case) of the RHS function 
@@ -169,15 +160,11 @@ def GNLSE_RHS( z, AW, simp):
     return  1.0j * simp['gamma'] * np.multiply( simp['W'], np.multiply( M, np.exp( -simp['linop'] * z)) )
 
 
-def instatus( aktl, slength, t1 ):
-    frac =  aktl/slength
-    if frac>0.0:
-        t2 = time()    
-        tel = t2-t1        
-        trem = (1-frac)*tel/frac
-        print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
     
 def perform_simulation( simp, inifield):  
+    """
+    integrate the propagation using a scipy ode solver 
+    """
     integr = prepare_integrator( simp, inifield)
     zvec = []
     ferg = []
@@ -203,9 +190,101 @@ def perform_simulation( simp, inifield):
 
 
 
-#
-# input and output
-#
+# -----------------------------------------------------------------------------
+# DIFFERENT RAMAN RESPONSE FUNCTIONS
+# -----------------------------------------------------------------------------
+
+
+def raman_blowwood(tvec):
+    """
+    
+    Raman response function for silica fiber (single Lorentzian) with the model from 
+
+    K. J. Blow and D. Wood, 
+    Theoretical description of transient stimulated Raman scattering in optical fibers,
+    IEEE Journal of Quantum Electronics, vol. 25, no. 12, pp. 2665–2673, Dec. 1989.
+
+    value for fr given in the paper fr = 0.18
+    """  
+    tau1 = 12.2e-15
+    tau2 = 32.0e-15
+    tvec2 = np.multiply( tvec, tvec>=0) # using tvec2 prevents numerical issues for big negative times with exp   
+    rt = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec2/tau2), np.sin(tvec2/tau1))
+    rt = np.multiply( rt, tvec>=0)
+    return rt
+
+
+
+def raman_linagrawal(tvec):
+    """
+    raman_lin_agrawal(tvec)
+
+    Raman response function for silica fiber (with added Boson peak) with the model from 
+
+    Q. Lin and G. P. Agrawal, 
+    Raman response function for silica fibers,
+    Opt. Lett., vol. 31, no. 21,  pp. 3086–3088, Nov. 2006.
+
+    value for fr given in the paper fr = 0.245
+    """
+    tau1 = 12.2e-15
+    tau2 = 32.0e-15
+    taub=  96.0e-15
+    fa=0.75
+    fb=0.21
+    fc=0.04
+    tvec2 = np.multiply( tvec, tvec>=0) # using tvec2 prevents numerical issues for b
+    ha = (tau1**2 + tau2**2)/(tau1 * tau2**2) *np.multiply( np.exp(-tvec2/tau2), np.sin(tvec2/tau1))
+    hb= (2*taub-tvec2)/taub**2 *  np.exp(-tvec2/taub)
+    RT=np.multiply(  (fa+fc)*ha+fb*hb    , tvec>0)
+    return RT
+
+def raman_hollenbeck(tvec):
+    """    
+    raman_holl(tvec)
+    
+    Raman response function for silica fiber (quite accurate compared to measured response) with the model from 
+    
+    D. Hollenbeck and C. Cantrell
+    J. Opt. Soc. Am. B / Vol. 19, No. 12 / December 2002
+    Multiple-vibrational-mode model for fiber-optic Raman gain
+    spectrum and response function Dawn Hollenbeck* and Cyrus D. Cantrell
+    PhoTEC, Erik Jonsson School, University of Texas at Dallas, Richardson, Texas 750
+
+
+    value for fr: not given in the paper. I remember that the experimental fraction shall be  fr = 0.2
+    """
+    tvec2 = np.multiply( tvec, tvec>=0) # using tvec2 prevents numerical issues for b
+    
+    comp_pos=[56.25,100.0,231.25,362.5,463.0,497.0,611.5,
+              691.67,793.67,835.5,930.0,1080.0,1215.0]
+    peak_intens=[1.0,11.40,36.67,67.67,74.0,4.5,6.8,
+                4.6,4.2,4.5,2.7,3.1,3.0]
+    gauss_fwhm=[52.10,110.42,175.00,162.50,135.33,24.5,41.5,155.00,
+                59.5,64.3,150.0,91.0,160.0]
+    lor_fwhm=[17.37,38.81,58.33,54.17,45.11,8.17,13.83,51.67,
+              19.83,21.43,50.00,30.33,53.33]
+    c=2.99792458e8
+    biggamma = np.pi * c * np.array(gauss_fwhm)*100
+    smallgamma = np.pi * c * np.array(lor_fwhm)*100
+    A = np.array(peak_intens)
+    ompos = 2 * np.pi * c* np.array(comp_pos)*100
+    hr = np.zeros(np.shape(tvec))
+    for i in range(13):
+        hr += A[i] *np.multiply(np.multiply( np.exp( - tvec2 * smallgamma[i]),
+                                             np.exp( - biggamma[i]**2 * tvec2**2/4)),
+                                np.sin(tvec2 * ompos[i]))
+    hr = np.multiply( hr, tvec>0)
+    dt = tvec[2]-tvec[1]
+    hr = hr / (np.sum(hr) * dt)
+    return hr
+
+
+
+
+# -----------------------------------------------------------------------------
+# INPUT AND OUTPUT 
+# -----------------------------------------------------------------------------
 
 def saveoutput(filename, tf,ff,zv, simparams):
     outputdict = {}
@@ -245,7 +324,7 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
     plt.subplot(221)
     plt.plot( d['tvec'], np.abs(d['tfield2'])**2)
     plt.plot( d['tvec'], np.abs(d['tfield1'])**2,linewidth=3)
-    plt.legend(["out","in"])
+    plt.legend(["out","in"],loc=0)
 
 
     plt.subplot(222)
@@ -253,7 +332,7 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
     plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield1']),linewidth=3)
     if 'fylim' in zparams.keys():
         plt.ylim(zparams['fylim'])
-    plt.legend(["out","in"])
+    plt.legend(["out","in"],loc=0)
     print zparams.keys()
     plt.subplot(223)
     plt.imshow( np.abs(d['timefield'])**2,
@@ -272,3 +351,33 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
     plt.colorbar()
     if 'clim' in zparams.keys():
         ax.set_clim(zparams['clim'])
+
+
+
+# -----------------------------------------------------------------------------
+# AUXILARY FUNCTIONS
+# -----------------------------------------------------------------------------
+
+
+
+def beta0_curve(omvec, om0, betas):
+    """
+    calculate the dispersion curve via Taylor coefficients
+    """
+    bc = np.zeros(len(omvec))
+    for i in range(len(betas)):
+        bc = bc + betas[i]/factorial(i) * (omvec-om0)**i
+    return bc
+
+
+
+def instatus( aktl, slength, t1 ):
+    """
+    give the status of the integration (used by perform_
+    """
+    frac =  aktl/slength
+    if frac>0.0:
+        t2 = time()    
+        tel = t2-t1        
+        trem = (1-frac)*tel/frac
+        print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
