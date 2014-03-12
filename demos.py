@@ -38,6 +38,17 @@ def ramanshift_long():
 
 
 def self_steepening():
+    """ self-steepening term: 
+
+    compare to the Chapter 'Higher-Order Nonlinear Effects / Self-Steepening'
+    
+    in
+
+    Govind P. Agrawal
+    Nonlinear Fiber Optics
+    Fourth Edition
+    ELSEVIER
+    """
     beta2 = 0.0 #no dispersion
     betas = [0,0,beta2]
     gamma = 2.100000e-02
@@ -56,7 +67,6 @@ def self_steepening():
                                abstol=1e-12 ,
                                shock=True,
                                raman = False)
-    # see agrawal chapter
     s = 0.01 #self-steepening factor
     T0 = 1/s/simparams['om0']
     inifield = np.sqrt(P) * np.exp( -0.5* (simparams['tvec']/1.0/T0)**2)  #gaussian field
@@ -67,8 +77,6 @@ def self_steepening():
     inoutplot(d,zparams={"fignr":2})
     plt.show()
     
-
-
 
 
 def higher_order_soliton(Nsol):
@@ -89,9 +97,7 @@ def higher_order_soliton(Nsol):
                                12,  # Npoints
                                1.0, #tempspread
                                zpoints=200,
-                             #  integratortype = 'dopri5',#'dop853'
                                integratortype='dop853',
- #                              integratortype='lsoda',
                                reltol=1e-6, 
                                abstol=1e-12 ,
                                shock=False,
@@ -99,11 +105,49 @@ def higher_order_soliton(Nsol):
     inifield = np.sqrt(P) * 1.0 / np.cosh( simparams['tvec']/T0) #higher order soliton
 
     tf,ff,zv = perform_simulation( simparams, inifield)
-    saveoutput('testoutput.mat', tf, ff, zv, simparams)
     saveoutput('hos.demo', tf, ff, zv, simparams)
     d = loadoutput('hos.demo')
     inoutplot(d,zparams={"fignr":3})
     plt.show()
+
+
+def supercontinuumgeneration():
+    """
+    example of Supercontinuum generation in a PCF
+
+    see: J. M. Dudley, G. Genty, and S. Coen, 
+    'Supercontinuum generation in photonic crystal fiber,'
+    Rev. Mod. Phys., vol. 78, no. 4, p. 1135, Oktober 2006.
+    """
+
+    betas = [0,0,-11.830e-3*1e-24, 8.1038e-5*1e-36, -9.5205e-8*1e-48, 2.0737e-10*1e-60,
+         -5.3943e-13*1e-72, 1.3486e-15*1e-84, -2.5495e-18*1e-96, 3.0524e-21*1e-108,
+         -1.7140e-24*1e-120];
+    gamma = 0.1
+    flength = 0.15
+    simparams = prepare_sim_params(0.0, 
+                               betas ,
+                               835e-9,
+                               gamma,
+                               flength,
+                               13,  # Npoints
+                               1.0, #tempspread
+                               zpoints=200,                                          integratortype='dop853', 
+                               reltol=1e-3, 
+                               abstol=1e-6 ,
+                               shock=True,
+                               raman = True,
+                               ramantype = 'blowwood',#'hollenbeck',  #or  'blowwood', 'linagrawal'
+                                fr=0.18  )
+    t0 = 28.4e-15
+    p = 10e3
+    inifield = np.sqrt(p) * 1./np.cosh(simparams['tvec']/t0)    
+    tf,ff,zv = perform_simulation( simparams, inifield)
+    saveoutput('scg.demo', tf, ff, zv, simparams)
+    d = loadoutput('scg.demo')
+    inoutplot(d,zparams={"fignr":3, "clim":(-360,-220),'fylim':(-360,-220)})
+    plt.show()
+          
 
 # -------------------------------------------------------
 # choose between different demos
@@ -111,6 +155,7 @@ def higher_order_soliton(Nsol):
 
 
 if __name__=='__main__':
-#    ramanshift_long()
+    #ramanshift_long()
     #self_steepening()
-    higher_order_soliton(4.0)
+    #higher_order_soliton(4.0)
+    supercontinuumgeneration()

@@ -77,6 +77,7 @@ def prepare_sim_params( alpha,
     if raman==True:
         if ramantype.lower() in ['blowwood','linagrawal','hollenbeck']:
             print("Raman response type : %s"%ramantype)
+            print("response fraction fr: %.3f"%(fr))
     if ramantype=='blowwood':
         RT=raman_blowwood(tvec)
     elif ramantype=='linagrawal':
