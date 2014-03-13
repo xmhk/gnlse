@@ -173,7 +173,7 @@ def prepare_integrator(simparameters, inifield):
     simpsub = dict( (k, simparameters[k]) for k in ('gamma','raman','linop','W','dz','dt','RW','fr'))
 
         # the line below creates a new function handle as some of the scipy integrator functions
-        # seem not to wrap additional parameters (simparameters in this case) of the RHS function 
+        # seem not to wrap additional parameters (simpsub in this case) of the RHS function 
         # correctly  (as SCIPY 0.14.0.dev-a3e9c7f)
     GNLSE_RHS2 = funcpartial( GNLSE_RHS, simp=simpsub)    
  
