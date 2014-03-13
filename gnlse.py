@@ -6,15 +6,23 @@ from scipy.misc import factorial
 from scipy.integrate import complex_ode
 from time import time
 import scipy.io as sio
-from matplotlib import pyplot as plt #you only need this for 'inoutplot'
-from optictools import db_abs, db_abs2 # like matplotlib, optictools can be found on github/xmhk
+from matplotlib import pyplot as plt    # you only need this for 'inoutplot'
+from optictools import db_abs, db_abs2  # like matplotlib, optictools can be found on github/xmhk
 
+# -----------------------------------------------------------------------------
+# CODE OVERVIEW:
+#
+# 1. FUNCTIONS TO SET PARAMETERS AND PERFORM CALCULATION
+# 2. CORE SIMULATION
+# 3. DIFFERENT RAMAN RESPONSE FUNCTIONS
+# 4. INPUT AND OUTPUT 
+# 5. AUXILARY FUNCTIONS
+# -----------------------------------------------------------------------------
 
 
 # -----------------------------------------------------------------------------
 # 1. FUNCTIONS TO SET PARAMETERS AND PERFORM CALCULATION
 # -----------------------------------------------------------------------------
-
 
 def prepare_sim_params( alpha,
                         betas ,
