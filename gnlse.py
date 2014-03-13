@@ -11,6 +11,11 @@ from optictools import db_abs, db_abs2 # like matplotlib, optictools can be foun
 
 
 
+# -----------------------------------------------------------------------------
+# 1. FUNCTIONS TO SET PARAMETERS AND PERFORM CALCULATION
+# -----------------------------------------------------------------------------
+
+
 def prepare_sim_params( alpha,
                         betas ,
                         centerwavelength,                        
@@ -117,6 +122,39 @@ def prepare_sim_params( alpha,
     Retval['integratortype']=integratortype
     return Retval
 
+    
+def perform_simulation( simp, inifield):  
+    """
+    integrate the propagation using a scipy ode solver 
+    """
+    integr = prepare_integrator( simp, inifield)
+    zvec = []
+    freqfieldlist = []
+    freqfieldlist2 = []
+    startingtime = time()
+    slength = simp['length']
+    zvec.append(0)
+    freqfieldlist.append(np.fft.ifft( inifield))
+    #
+    # the fft scalingfactor ensures that the energy is conserved in both domains
+    #
+    scalefak = np.sqrt( simp['dt'] / simp['dom'] * simp['points'] )
+    freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
+    for i in range(simp['zpoints']):
+        instatus( integr.t, slength, startingtime)
+        integr.integrate(integr.t + simp['dz'])
+        zvec.append(integr.t)        
+        freqfield = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
+        freqfieldlist.append(freqfield)
+        freqfieldlist2.append(np.fft.fftshift(freqfield) * scalefak)
+    timefieldarray =np.fft.fft(freqfieldlist)
+    return timefieldarray, np.array(freqfieldlist2) ,zvec
+
+
+
+# -----------------------------------------------------------------------------
+# 2. CORE SIMULATION
+# -----------------------------------------------------------------------------
 
 
 def prepare_integrator(simp, inifield):
@@ -159,38 +197,8 @@ def GNLSE_RHS( z, AW, simp):
     return  1.0j * simp['gamma'] * np.multiply( simp['W'], np.multiply( M, np.exp( -simp['linop'] * z)) )
 
 
-    
-def perform_simulation( simp, inifield):  
-    """
-    integrate the propagation using a scipy ode solver 
-    """
-    integr = prepare_integrator( simp, inifield)
-    zvec = []
-    freqfieldlist = []
-    freqfieldlist2 = []
-    startingtime = time()
-    slength = simp['length']
-    zvec.append(0)
-    freqfieldlist.append(np.fft.ifft( inifield))
-    #
-    # the fft scalingfactor ensures that the energy is conserved in both domains
-    #
-    scalefak = np.sqrt( simp['dt'] / simp['dom'] * simp['points'] )
-    freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
-    for i in range(simp['zpoints']):
-        instatus( integr.t, slength, startingtime)
-        integr.integrate(integr.t + simp['dz'])
-        zvec.append(integr.t)        
-        freqfield = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
-        freqfieldlist.append(freqfield)
-        freqfieldlist2.append(np.fft.fftshift(freqfield) * scalefak)
-    timefieldarray =np.fft.fft(freqfieldlist)
-    return timefieldarray, np.array(freqfieldlist2) ,zvec
-
-
-
 # -----------------------------------------------------------------------------
-# DIFFERENT RAMAN RESPONSE FUNCTIONS
+# 3. DIFFERENT RAMAN RESPONSE FUNCTIONS
 # -----------------------------------------------------------------------------
 
 
@@ -281,7 +289,7 @@ def raman_hollenbeck(tvec):
 
 
 # -----------------------------------------------------------------------------
-# INPUT AND OUTPUT 
+# 4. INPUT AND OUTPUT 
 # -----------------------------------------------------------------------------
 
 def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
@@ -377,7 +385,7 @@ def inoutplot(d,zparams={}):
 
 
 # -----------------------------------------------------------------------------
-# AUXILARY FUNCTIONS
+# 5. AUXILARY FUNCTIONS
 # -----------------------------------------------------------------------------
 
 
@@ -395,7 +403,7 @@ def beta0_curve(omvec, om0, betas):
 
 def instatus( aktl, slength, startingtime ):
     """
-    give the status of the integration (used by perform_
+    give the status of the integration (used by perform_simulation)
     """
     frac =  aktl/slength
     if frac>0.0:
