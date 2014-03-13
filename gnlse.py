@@ -132,7 +132,10 @@ def prepare_integrator(simp, inifield):
     integrator = complex_ode(GNLSE_RHS2)
         # available types  dop853   dopri5   lsoda    vode
         # zvode also available, but do not use, as complex ode handling already wrapped above
-    integrator.set_integrator(simp['integratortype'], atol=simp['abstol'],rtol=simp['reltol'],nsteps=simp['nsteps'])
+    integrator.set_integrator(simp['integratortype'], 
+                              atol=simp['abstol'],
+                              rtol=simp['reltol'],
+                              nsteps=simp['nsteps'])
     integrator.set_initial_value(np.fft.ifft( inifield))
     return integrator
 
@@ -148,16 +151,11 @@ def GNLSE_RHS( z, AW, simp):
     """    
     AT = np.fft.fft( np.multiply( AW , np.exp( simp['linop'] * z)))
     IT = np.abs(AT)**2  
-
     if simp['raman'] == True:
         RS = simp['dt']  *  np.fft.fft( np.multiply( np.fft.ifft(IT), simp['RW'] ))
-        M = np.fft.ifft( np.multiply( AT, 
-                                      ( (1-simp['fr'])*IT +  simp['fr'] *  RS  )
-                                     )
-                        )      
+        M = np.fft.ifft( np.multiply( AT,( (1-simp['fr'])*IT +  simp['fr']*RS ) ) )      
     else:
         M = np.fft.ifft( np.multiply( AT, IT))
-
     return  1.0j * simp['gamma'] * np.multiply( simp['W'], np.multiply( M, np.exp( -simp['linop'] * z)) )
 
 
@@ -168,26 +166,26 @@ def perform_simulation( simp, inifield):
     """
     integr = prepare_integrator( simp, inifield)
     zvec = []
-    fresult = []
-    fresult2 = []
-    t1 = time()
+    freqfieldlist = []
+    freqfieldlist2 = []
+    startingtime = time()
     slength = simp['length']
     zvec.append(0)
-    fresult.append(np.fft.ifft( inifield))
+    freqfieldlist.append(np.fft.ifft( inifield))
     #
     # the fft scalingfactor ensures that the energy is conserved in both domains
     #
     scalefak = np.sqrt( simp['dt'] / simp['dom'] * simp['points'] )
-    fresult2.append(np.fft.fftshift(np.fft.ifft( inifield)) *scalefak)
+    freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
     for i in range(simp['zpoints']):
-        instatus( integr.t, slength, t1)
+        instatus( integr.t, slength, startingtime)
         integr.integrate(integr.t + simp['dz'])
         zvec.append(integr.t)        
-        tf = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
-        fresult.append(tf)
-        fresult2.append(np.fft.fftshift(tf) * scalefak)
-    tresult =np.fft.fft(fresult)
-    return tresult, np.array(fresult2) ,zvec
+        freqfield = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
+        freqfieldlist.append(freqfield)
+        freqfieldlist2.append(np.fft.fftshift(freqfield) * scalefak)
+    timefieldarray =np.fft.fft(freqfieldlist)
+    return timefieldarray, np.array(freqfieldlist2) ,zvec
 
 
 
@@ -286,7 +284,7 @@ def raman_hollenbeck(tvec):
 # INPUT AND OUTPUT 
 # -----------------------------------------------------------------------------
 
-def saveoutput(filename, tf,ff,zv, simparams):
+def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
     """
     saves the output (temporal and spectral field,
     some simparams in one matlab-style file
@@ -301,14 +299,14 @@ def saveoutput(filename, tf,ff,zv, simparams):
     outputdict['zpoints']=simparams['zpoints']
     outputdict['points']=simparams['points']
     
-    outputdict['timefield']=tf
-    outputdict['freqfield']=ff
-    outputdict['zvec']=zv
+    outputdict['timefield']=timefieldarray
+    outputdict['freqfield']=freqfieldarray
+    outputdict['zvec']=zvec
 
-    outputdict['tfield1'] = tf[0,:]
-    outputdict['ffield1'] = ff[0,:]
-    outputdict['tfield2'] = tf[simparams['zpoints'],:]
-    outputdict['ffield2'] = ff[simparams['zpoints'],:]
+    outputdict['tfield1'] = timefieldarray[0,:]
+    outputdict['ffield1'] = freqfieldarray[0,:]
+    outputdict['tfield2'] = timefieldarray[simparams['zpoints'],:]
+    outputdict['ffield2'] = freqfieldarray[simparams['zpoints'],:]
     sio.savemat( filename , outputdict)
 
 def loadoutput(filename):
@@ -395,13 +393,13 @@ def beta0_curve(omvec, om0, betas):
 
 
 
-def instatus( aktl, slength, t1 ):
+def instatus( aktl, slength, startingtime ):
     """
     give the status of the integration (used by perform_
     """
     frac =  aktl/slength
     if frac>0.0:
         t2 = time()    
-        tel = t2-t1        
+        tel = t2-startingtime        
         trem = (1-frac)*tel/frac
         print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
