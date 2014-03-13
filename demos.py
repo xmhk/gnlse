@@ -29,8 +29,10 @@ def ramanshift_long():
                                raman = True)
     inifield = np.sqrt(P) * 1.0 / np.cosh( (simparams['tvec']+1e-12)/T0)
     tf,ff,zv = perform_simulation( simparams, inifield)
-    
     saveoutput('raman.demo', tf, ff, zv, simparams)
+    #
+    # output plot
+    #
     d = loadoutput('raman.demo')
     inoutplot(d,zparams={"fignr":1})
     plt.show()
@@ -73,6 +75,9 @@ def self_steepening():
 
     tf,ff,zv = perform_simulation( simparams, inifield)
     saveoutput('shock.demo', tf, ff, zv, simparams)
+    #
+    # output plot
+    #
     d = loadoutput('shock.demo')
     inoutplot(d,zparams={"fignr":2})
     plt.show()
@@ -80,6 +85,18 @@ def self_steepening():
 
 
 def higher_order_soliton(Nsol):
+    """ a higher order soliton 
+
+    compare to the Chapter 'Fiber Solitons'
+    
+    in
+
+    Govind P. Agrawal
+    Nonlinear Fiber Optics
+    Fourth Edition
+    ELSEVIER
+
+    """
     beta2 = -10.0e-27
     betas = [0,0,beta2]
     gamma = 2.100000e-02
@@ -106,6 +123,9 @@ def higher_order_soliton(Nsol):
 
     tf,ff,zv = perform_simulation( simparams, inifield)
     saveoutput('hos.demo', tf, ff, zv, simparams)
+    #
+    # output plot
+    #
     d = loadoutput('hos.demo')
     inoutplot(d,zparams={"fignr":3})
     plt.show()
@@ -113,8 +133,8 @@ def higher_order_soliton(Nsol):
 def soliton_self_frequency_shift_cancellation():
     """
     soliton self frequency shift cancellation: a soliton gets red-shifted due to the 
-    raman effect towards the zero-dispersion wavelength of a fiber. The the shift is
-    cancelled and the soliton couples energy to a dispersive wave in the region of 
+    raman effect towards the zero-dispersion wavelength of a fiber. Then the shift is
+    cancelled and the soliton strongly couples energy to a dispersive wave in the region of 
     normal dispersion.
     
     See D. V. Skryabin, F. Luan, J. C. Knight, and P. S. J. Russell,
@@ -184,7 +204,8 @@ def supercontinuumgeneration():
                                flength,
                                13,  # Npoints
                                1.0, #tempspread
-                               zpoints=200,                                          integratortype='dop853', 
+                               zpoints=200,      
+                               integratortype='dop853', 
                                reltol=1e-3, 
                                abstol=1e-6 ,
                                shock=True,
@@ -196,6 +217,9 @@ def supercontinuumgeneration():
     inifield = np.sqrt(p) * 1./np.cosh(simparams['tvec']/t0)    
     tf,ff,zv = perform_simulation( simparams, inifield)
     saveoutput('scg.demo', tf, ff, zv, simparams)
+    #
+    # output plot
+    #
     d = loadoutput('scg.demo')
     inoutplot(d,zparams={"fignr":3, "clim":(-360,-220),'fylim':(-360,-220)})
     plt.show()
@@ -210,5 +234,5 @@ if __name__=='__main__':
     #ramanshift_long()
     #self_steepening()
     #higher_order_soliton(4.0)
-    #    supercontinuumgeneration()
+    #supercontinuumgeneration()
     soliton_self_frequency_shift_cancellation()
