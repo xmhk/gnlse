@@ -168,26 +168,26 @@ def perform_simulation( simp, inifield):
     """
     integr = prepare_integrator( simp, inifield)
     zvec = []
-    ferg = []
-    ferg2 = []
+    fresult = []
+    fresult2 = []
     t1 = time()
     slength = simp['length']
     zvec.append(0)
-    ferg.append(np.fft.ifft( inifield))
+    fresult.append(np.fft.ifft( inifield))
     #
     # the fft scalingfactor ensures that the energy is conserved in both domains
     #
     scalefak = np.sqrt( simp['dt'] / simp['dom'] * simp['points'] )
-    ferg2.append(np.fft.fftshift(np.fft.ifft( inifield)) *scalefak)
+    fresult2.append(np.fft.fftshift(np.fft.ifft( inifield)) *scalefak)
     for i in range(simp['zpoints']):
         instatus( integr.t, slength, t1)
         integr.integrate(integr.t + simp['dz'])
         zvec.append(integr.t)        
         tf = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
-        ferg.append(tf)
-        ferg2.append(np.fft.fftshift(tf) * scalefak)
-    terg =np.fft.fft(ferg)
-    return terg, np.array(ferg2) ,zvec
+        fresult.append(tf)
+        fresult2.append(np.fft.fftshift(tf) * scalefak)
+    tresult =np.fft.fft(fresult)
+    return tresult, np.array(fresult2) ,zvec
 
 
 

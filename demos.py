@@ -293,9 +293,9 @@ def compare_raman_response_functions():
 
 if __name__=='__main__':
     #ramanshift_long()
-    #self_steepening()
+    self_steepening()
     #higher_order_soliton(4.0)
     #soliton_self_frequency_shift_cancellation()
     #supercontinuumgeneration()
-    compare_raman_response_functions()
+    #compare_raman_response_functions()
     
