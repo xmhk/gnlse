@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 
 import numpy as np
 from functools import partial as funcpartial
@@ -187,7 +187,7 @@ def perform_simulation( simp, inifield):
         ferg.append(tf)
         ferg2.append(np.fft.fftshift(tf) * scalefak)
     terg =np.fft.fft(ferg)
-    return terg, np.array( ferg2) ,zvec
+    return terg, np.array(ferg2) ,zvec
 
 
 
@@ -197,13 +197,12 @@ def perform_simulation( simp, inifield):
 
 
 def raman_blowwood(tvec):
-    """
-    
+    """    
     Raman response function for silica fiber (single Lorentzian) with the model from 
 
     K. J. Blow and D. Wood, 
     Theoretical description of transient stimulated Raman scattering in optical fibers,
-    IEEE Journal of Quantum Electronics, vol. 25, no. 12, pp. 2665–2673, Dec. 1989.
+    IEE Journ. of Quant. Electronics, vol 25, no 12, pp 2665-2673, 1989
 
     value for fr given in the paper fr = 0.18
     """  
@@ -224,7 +223,7 @@ def raman_linagrawal(tvec):
 
     Q. Lin and G. P. Agrawal, 
     Raman response function for silica fibers,
-    Opt. Lett., vol. 31, no. 21,  pp. 3086–3088, Nov. 2006.
+    Opt Lett, vol 31, no 21, pp.3086-3088, 2006
 
     value for fr given in the paper fr = 0.245
     """
@@ -288,6 +287,10 @@ def raman_hollenbeck(tvec):
 # -----------------------------------------------------------------------------
 
 def saveoutput(filename, tf,ff,zv, simparams):
+    """
+    saves the output (temporal and spectral field,
+    some simparams in one matlab-style file
+    """
     outputdict = {}
     outputdict['tvec'] = simparams['tvec']
     outputdict['omvec']=simparams['omvec']
@@ -309,6 +312,9 @@ def saveoutput(filename, tf,ff,zv, simparams):
     sio.savemat( filename , outputdict)
 
 def loadoutput(filename):
+    """
+    load output saved by 'saveoutput'
+    """
     d = sio.loadmat(filename)
     for k in d.keys():
         if k not in ('__header__','__globals__','__version__','timefield','freqfield'):
@@ -317,7 +323,13 @@ def loadoutput(filename):
     return d
 
 
-def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as evolution in one figure
+def inoutplot(d,zparams={}): 
+    """
+    plot the input and output (both domains)
+    as well as temporal and spectral evolution
+    into one figure
+    """
+
     if 'fignr' in zparams.keys():
         plt.figure(zparams['fignr'])
     else:

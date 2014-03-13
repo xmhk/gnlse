@@ -225,6 +225,67 @@ def supercontinuumgeneration():
     plt.show()
           
 
+def compare_raman_response_functions():
+    """
+    compare the three available raman response functions.
+    plots the temporal and the spectral response.
+
+    see e.g.  Q. Lin and G. P. Agrawal, 
+    Raman response function for silica fibers
+    OL 31, no 21 pp 3086-3088, nov 2006
+    """
+    simparams = prepare_sim_params(0.0, 
+                               [0 ,0,0,0],
+                               800e-9,
+                               0.0,
+                               1.0,
+                               11,  # Npoints
+                               1.0, #tempspread 
+                                   )
+    r_bw = raman_blowwood(simparams['tvec'])
+    r_la = raman_linagrawal(simparams['tvec'])
+    r_hc = raman_hollenbeck(simparams['tvec'])
+
+    ft_bw = np.fft.fftshift(np.fft.ifft(np.fft.fftshift( r_bw)))
+    ft_la = np.fft.fftshift(np.fft.ifft(np.fft.fftshift(r_la)))
+    ft_hc = np.fft.fftshift(np.fft.ifft(np.fft.fftshift(r_hc)))
+
+    plt.figure(1)
+    plt.title("temporal response function R(t)")
+    plt.plot( simparams['tvec']/1e-12, r_bw, color="#ff0000")
+    plt.plot( simparams['tvec']/1e-12, r_la, color="#000000")
+    plt.plot( simparams['tvec']/1e-12, r_hc, color="#0000ff")
+    plt.xlabel("time / ps")
+    plt.ylabel("response / a.u.")
+    plt.legend(["Blow, Wood","Lin, Agrawal","Hollenbeck, Cantrell"])
+    plt.xlim([-.2, np.max(simparams['tvec']/1e-12)])
+
+    plt.figure(2)
+    plt.subplot(211)
+    plt.title("fourier transform R(omega) IMAG part")
+    plt.plot( simparams['relomvec']/2e12/np.pi, np.imag(ft_bw), color="#ff0000")
+    plt.plot( simparams['relomvec']/2e12/np.pi, np.imag(ft_la), color="#000000")
+    plt.plot( simparams['relomvec']/2e12/np.pi, np.imag(ft_hc), color="#0000ff")
+    plt.axhline(y=0, color="#999999")
+    plt.legend(["Blow, Wood","Lin, Agrawal","Hollenbeck, Cantrell"])
+    plt.xlim([-5,45])
+    plt.xlabel("frequency / THz")
+    plt.ylabel("imag part of R(omega)")
+
+    plt.subplot(212)
+    plt.title("fourier transform R(omega) REAL part")
+    plt.plot( simparams['relomvec']/2e12/np.pi, np.real(ft_bw), color="#ff0000")
+    plt.plot( simparams['relomvec']/2e12/np.pi, np.real(ft_la), color="#000000")
+    plt.plot( simparams['relomvec']/2e12/np.pi, np.real(ft_hc), color="#0000ff")
+    plt.legend(["Blow, Wood","Lin, Agrawal","Hollenbeck, Cantrell"])
+    plt.axhline(y=0, color="#999999")
+    plt.xlabel("frequency / THz")
+    plt.ylabel("real part of R(omega)")
+    plt.xlim([-5,45])
+    
+    plt.show()
+
+
 # -------------------------------------------------------
 # choose between different demos
 # -------------------------------------------------------
@@ -234,5 +295,7 @@ if __name__=='__main__':
     #ramanshift_long()
     #self_steepening()
     #higher_order_soliton(4.0)
+    #soliton_self_frequency_shift_cancellation()
     #supercontinuumgeneration()
-    soliton_self_frequency_shift_cancellation()
+    compare_raman_response_functions()
+    
