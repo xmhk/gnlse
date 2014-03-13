@@ -110,6 +110,58 @@ def higher_order_soliton(Nsol):
     inoutplot(d,zparams={"fignr":3})
     plt.show()
 
+def soliton_self_frequency_shift_cancellation():
+    """
+    soliton self frequency shift cancellation: a soliton gets red-shifted due to the 
+    raman effect towards the zero-dispersion wavelength of a fiber. The the shift is
+    cancelled and the soliton couples energy to a dispersive wave in the region of 
+    normal dispersion.
+    
+    See D. V. Skryabin, F. Luan, J. C. Knight, and P. S. J. Russell,
+    'Soliton Self-Frequency Shift Cancellation in Photonic Crystal Fibers,'
+    Science, vol 301, no 5640, pp. 1705-1708, 2003
+
+    for comparison. I didn't get all the fiber parameters (nonlinearity), so the lengths
+    for cancellation differ.
+
+    """
+    betas = [0, 0, -7.1679349121808307e-26, -3.6107349971451975e-40, 2.7392471626385486e-54, -1.10309281585831e-68, 2.3170537110678921e-83, 1.1816697954223225e-98, -2.0052740903697599e-112, 3.7468050911407223e-127]
+    gamma = 0.3
+   
+    flength = 2.0
+    simparams = prepare_sim_params(0.0, 
+                                   betas ,
+                                   2.99792458e8/250e12,
+                                   gamma,
+                                   flength,
+                                   12,  # Npoints
+                                   1.0, #tempspread
+                                   zpoints=200,
+                                   integratortype='dop853',
+                                   reltol=1e-4, 
+                                   abstol=1e-7 ,
+                                   shock=True,
+                                   raman = True,
+                                  # ramantype = 'blowwood',#'hollenbeck',  #or  'blowwood', 'linagrawal'
+                                  # fr=0.18
+                                   )
+    tau = 53e-15
+    t0 = tau / 2 / np.arcsinh(1)
+    p = 215.
+   
+    inifield = np.sqrt(p) * 1/np.cosh( (simparams['tvec']+3.2e-12)/t0)
+   
+    tf,ff,zv = perform_simulation( simparams, inifield)
+    saveoutput('ssfs_c.demo', tf, ff, zv, simparams)
+    #
+    # output plot
+    #
+    d = loadoutput('ssfs_c.demo')
+    [ax1,ax2,ax3,ax4]=inoutplot(d,zparams={"fignr":3,'clim':(-280,-220)})
+    ax2.set_ylim([-280,-220])
+    ax2.set_xlim([150e12,320e12])
+    ax4.set_xlim([150e12,320e12])  
+    plt.show()
 
 def supercontinuumgeneration():
     """
@@ -158,4 +210,5 @@ if __name__=='__main__':
     #ramanshift_long()
     #self_steepening()
     #higher_order_soliton(4.0)
-    supercontinuumgeneration()
+    #    supercontinuumgeneration()
+    soliton_self_frequency_shift_cancellation()

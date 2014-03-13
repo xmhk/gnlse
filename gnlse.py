@@ -322,20 +322,20 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
         plt.figure(zparams['fignr'])
     else:
         plt.figure(99)
-    plt.subplot(221)
+    ax1=plt.subplot(221)
     plt.plot( d['tvec'], np.abs(d['tfield2'])**2)
     plt.plot( d['tvec'], np.abs(d['tfield1'])**2,linewidth=3)
     plt.legend(["out","in"],loc=0)
 
 
-    plt.subplot(222)
+    ax2=plt.subplot(222)
     plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield2']))
     plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield1']),linewidth=3)
     if 'fylim' in zparams.keys():
         plt.ylim(zparams['fylim'])
     plt.legend(["out","in"],loc=0)
     print zparams.keys()
-    plt.subplot(223)
+    ax3=plt.subplot(223)
     plt.imshow( np.abs(d['timefield'])**2,
                 aspect='auto',
                 origin='lower',
@@ -343,7 +343,7 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
                          np.min(d['zvec']), np.max(d['zvec'])))
     plt.colorbar()
 
-    plt.subplot(224)
+    ax4=plt.subplot(224)
     ax=plt.imshow( db_abs2(d['freqfield']),
                    aspect='auto',
                    origin='lower',
@@ -352,6 +352,17 @@ def inoutplot(d,zparams={}):  # plot input and output (both domains) as well as 
     plt.colorbar()
     if 'clim' in zparams.keys():
         ax.set_clim(zparams['clim'])
+
+    ax1.set_xlabel("time / s")
+    ax1.set_ylabel("power / W")
+    ax2.set_xlabel("frequency / Hz")
+    ax2.set_ylabel("spectral energy density / dB")
+    ax3.set_xlabel("time / s")
+    ax3.set_ylabel("z / m")
+    ax4.set_xlabel("frequency / Hz")
+    ax4.set_ylabel("z / m")    
+
+    return [ax1,ax2,ax3,ax4]
 
 
 

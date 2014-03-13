@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 4, 12.03.2014
+Rev 5, 13.03.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -21,6 +21,7 @@ and J.M. Dudley that is provided in  "Supercontinuum Generation in Optical
 * Raman shift (soliton self frequency shift)
 * self-steepening
 * higher-order soliton
+* soliton self-frequency shift cancellation
 * supercontinuum generation
 
 ## required python packages:
