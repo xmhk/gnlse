@@ -41,7 +41,7 @@ def prepare_sim_params( alpha,
                         integratortype = 'dopri5',
                         zpoints = 256):
     """
-    prepare_sim_params
+    prepare_simparams
     
     creates a dict containing all information necessary for 
     simulation.
@@ -131,28 +131,28 @@ def prepare_sim_params( alpha,
     return Retval
 
     
-def perform_simulation( simp, inifield):  
+def perform_simulation( simparameters, inifield):  
     """
     integrate the propagation using a scipy ode solver 
     """
-    integr = prepare_integrator( simp, inifield)
+    integr = prepare_integrator( simparameters, inifield)
     zvec = []
     freqfieldlist = []
     freqfieldlist2 = []
     startingtime = time()
-    slength = simp['length']
+    slength = simparameters['length']
     zvec.append(0)
     freqfieldlist.append(np.fft.ifft( inifield))
     #
     # the fft scalingfactor ensures that the energy is conserved in both domains
     #
-    scalefak = np.sqrt( simp['dt'] / simp['dom'] * simp['points'] )
+    scalefak = np.sqrt( simparameters['dt'] / simparameters['dom'] * simparameters['points'] )
     freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
-    for i in range(simp['zpoints']):
+    for i in range(simparameters['zpoints']):
         instatus( integr.t, slength, startingtime)
-        integr.integrate(integr.t + simp['dz'])
+        integr.integrate(integr.t + simparameters['dz'])
         zvec.append(integr.t)        
-        freqfield = np.multiply ( integr.y , np.exp(simp['linop'] * (integr.t) ))
+        freqfield = np.multiply ( integr.y , np.exp(simparameters['linop'] * (integr.t) ))
         freqfieldlist.append(freqfield)
         freqfieldlist2.append(np.fft.fftshift(freqfield) * scalefak)
     timefieldarray =np.fft.fft(freqfieldlist)
@@ -165,23 +165,27 @@ def perform_simulation( simp, inifield):
 # -----------------------------------------------------------------------------
 
 
-def prepare_integrator(simp, inifield):
+def prepare_integrator(simparameters, inifield):
     """ 
     prepare an integration scipy can understand 
     """
+        # only pass the necessary subset of the simparameters dict to GNLSE ...
+    simpsub = dict( (k, simparameters[k]) for k in ('gamma','raman','linop','W','dz','dt','RW','fr'))
 
-    simpsub = dict( (k, simp[k]) for k in ('gamma','raman','linop','W','dz','dt','RW','fr'))
-        # the line below creates a new function handle as some the scipy integrator functions
-        # seem not to wrap additional parameters (simp in this case) of the RHS function 
+        # the line below creates a new function handle as some of the scipy integrator functions
+        # seem not to wrap additional parameters (simparameters in this case) of the RHS function 
         # correctly  (as SCIPY 0.14.0.dev-a3e9c7f)
     GNLSE_RHS2 = funcpartial( GNLSE_RHS, simp=simpsub)    
+ 
     integrator = complex_ode(GNLSE_RHS2)
         # available types  dop853   dopri5   lsoda    vode
         # zvode also available, but do not use, as complex ode handling already wrapped above
-    integrator.set_integrator(simp['integratortype'], 
-                              atol=simp['abstol'],
-                              rtol=simp['reltol'],
-                              nsteps=simp['nsteps'])
+
+    integrator.set_integrator(simparameters['integratortype'], 
+                              atol=simparameters['abstol'],
+                              rtol=simparameters['reltol'],
+                              nsteps=simparameters['nsteps'])
+
     integrator.set_initial_value(np.fft.ifft( inifield))
     return integrator
 
