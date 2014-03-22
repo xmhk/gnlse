@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 10, 22.03.2014
+Rev 11, 22.03.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -14,7 +14,7 @@ Rev 10, 22.03.2014
 ![Alt text](scg.png "supercontinuum generation example")
 
 
-## available Demos (see **demos.py**):
+## available demos (**demos.py**):
 
 * Raman shift (soliton self frequency shift)
 * self-steepening
@@ -87,11 +87,49 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
     
       see [corresponding section in the scipy docs](http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html#scipy.integrate.ode). Standard is dopri5
 
-### perform\_simulation
+* output:
+  * a simparams dict
 
-### saveoutput	
+### perform\_simulation
+integrates the gNLSE
+
+* arguments:
+  * simparameters: a simparam dict created by prepare\_simparams
+  * inifield: the electrical field in the time domain
+
+* ouput:
+  * a timefield array(size: N times zpoints+1)
+  * a freqfield array(size: N times zpoints+1)
+  * a z-vector
+
+### saveoutput:
+save the output for later use
+
+* INPUT: 
+  * filename (a string)
+  * timefieldarray,
+  * freqfieldarray
+  * zvec
+  * simparams
 
 ### loadoutput
+
+* INPUT filename
+* OUTPUT: a python dictionary, containing the fields:
+  
+  * betacurve - the beta0 curve used in the simulation
+  * ffield1, ffield2 - in- and output fields (frequency domain)
+  * freqfield - the full frequency field array  
+  * length - fiber length
+  * om0 - center angular frequency
+  * omvec - the absolute angular frequency vector
+  * points - number of points in the temporal / spectral domain
+  * relomvev - the relative angular frequency vector
+  * tfield1, tfield2 - in- and output fields (time domain)
+  * timefield - the full time field array
+  * tvec - time axis vector
+  * zpoints - the number of z points
+  * zvec - the z axis vector
 
 ### inoutplot
 
