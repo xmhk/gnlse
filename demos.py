@@ -4,6 +4,15 @@ import numpy as np
 import scipy.io as sio
 from gnlse import *
 
+# -----------------------------------------------------------------------------
+# DEMOS.PY
+#
+# you can run the demos either by 
+#    1) importing from this file 
+# or 2) by running this file as main: python demos.py
+#
+# -----------------------------------------------------------------------------
+
 def ramanshift_long():
     beta2 = -10e-27
     betas = [0,0,beta2]
@@ -285,6 +294,49 @@ def compare_raman_response_functions():
     
     plt.show()
 
+def simple_losses_demo():
+    beta2 = -10.0e-27
+    betas = [0,0,beta2]
+    gamma = 2.100000e-02
+    T0 = .250e-12
+    Nsol = 2.0
+    P = Nsol**2 * np.abs(beta2) / gamma / T0**2
+
+    zsol = np.pi/2.0 * T0**2/np.abs(beta2)
+    flength = 2.0
+
+    alpha1 = -0.6931
+    simparams = prepare_sim_params(alpha1,
+                               betas ,
+                               1064.0e-9,
+                               gamma,
+                               flength,
+                               12,  # Npoints
+                               1.0, #tempspread
+                               zpoints=600,
+                               integratortype='dop853',
+                               reltol=1e-4, 
+                               abstol=1e-8 ,
+                               shock=False,
+                               raman = False)
+    print simparams['dt']
+    inifield = np.sqrt(P) * 1.0 / np.cosh( simparams['tvec']/T0) #higher order soliton
+
+    tf,ff,zv = perform_simulation( simparams, inifield)
+    saveoutput('loss.demo', tf, ff, zv, simparams)
+    #
+    # output plot
+    #
+    d = loadoutput('loss.demo')
+    e1 = np.sum(np.abs(d['tfield1']))**2*simparams['dt']
+    e2theo = e1 * np.exp( alpha1*flength)
+    e2 = np.sum(np.abs(d['tfield2']))**2*simparams['dt']
+    print("energy in        : %.3e"%e1)
+    print("energy out       : %.3e"%e2)
+    print("energy out (theo): %.3e"%e2theo)
+    
+    #inoutplot(d,zparams={"fignr":5})
+    plt.show()
 
 # -------------------------------------------------------
 # choose between different demos
@@ -293,9 +345,11 @@ def compare_raman_response_functions():
 
 if __name__=='__main__':
     #ramanshift_long()
-    self_steepening()
+    #self_steepening()
     #higher_order_soliton(4.0)
     #soliton_self_frequency_shift_cancellation()
     #supercontinuumgeneration()
     #compare_raman_response_functions()
+    simple_losses_demo()
+
     

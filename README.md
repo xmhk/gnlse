@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 8, 22.03.2014
+Rev 9, 22.03.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -22,6 +22,7 @@ Rev 8, 22.03.2014
 * soliton self-frequency shift cancellation
 * supercontinuum generation
 * compare the different Raman response Models available (not actually a simulations but a temporal and spectral plot)
+* losses (simple, independent of frequency) 
 
 ## required python packages:
 
@@ -29,8 +30,8 @@ you will need recent **(!)** versions of
 
 * numpy
 * scipy
-* matplotlib (which is **not necessarily needed for simulations**, but required for function 'inoutplot)
-* optictools (like above, only required by 'inoutplot', which can be found on [(github/xmhk)](https://github.com/xmhk/optictools)
+* matplotlib (which is **not necessarily needed for simulations**, but required for function 'inoutplot')
+* optictools (like above, only required by 'inoutplot');  it can be found on [(github/xmhk)](https://github.com/xmhk/optictools)
 
 have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the lastest stable versions
 
