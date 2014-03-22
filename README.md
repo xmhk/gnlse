@@ -21,7 +21,7 @@ Rev 11, 22.03.2014
 * higher-order soliton
 * soliton self-frequency shift cancellation
 * supercontinuum generation via soliton fission
-* compare the different Raman response models available (not actually a simulations but a temporal and spectral plot)
+* compare the different Raman response models available (not actually a simulation but a temporal and spectral plot)
 * losses (simple, independent of frequency) 
 * frequency dependent losses (N=1 soliton center frequency changes)
 
@@ -53,7 +53,7 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
 
 ## Functions you need to access from outside 
 
-### prepare\_sim\_params(args, optargs)
+### prepare\_sim\_params(alpha, betas, centerwavelength, gamma, length, N, [OPTIONAL ARGUMENTS])
 
 * arguments (give in this order):
   * alpha - loss coefficient (1/m) or vector
@@ -90,7 +90,7 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
 * output:
   * a simparams dict
 
-### perform\_simulation
+### perform\_simulation( simparameters, inifield )
 integrates the gNLSE
 
 * arguments:
@@ -102,7 +102,7 @@ integrates the gNLSE
   * a freqfield array(size: N times zpoints+1)
   * a z-vector
 
-### saveoutput:
+### saveoutput(filename):
 save the output for later use
 
 * INPUT: 
@@ -112,9 +112,9 @@ save the output for later use
   * zvec
   * simparams
 
-### loadoutput
+### loadoutput(filename)
 
-* INPUT filename
+* INPUT: filename
 * OUTPUT: a python dictionary, containing the fields:
   
   * betacurve - the beta0 curve used in the simulation
