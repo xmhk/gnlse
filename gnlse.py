@@ -63,11 +63,17 @@ def prepare_sim_params( alpha,
     # -------------------------------------------------------
     if len(betas) == points: # dispersion curve as vector
         linop = 1.0j * betas
-        bk = betas           # store for later use
+        bk = betas           
     else:                    # dispersion via taylor coefficients
         bk = beta0_curve( relomvec, 0, betas)
         linop = 1.0j * bk
-    linop += alpha/2.        # loss 
+    if isinstance(alpha, float):       # loss (frequency independent)
+       linop += alpha/2.  
+    elif isinstance(alpha, np.ndarray) and np.shape(alpha) == np.shape(relomvec): #freq-dep. loss
+        linop += alpha/2.
+    else:
+        print("\n\n WARNING: alpha has to be a float or an array of N points. assuming alpha=0.0\n\n")
+        
     linop = np.fft.fftshift(linop)
     # -------------------------------------------------------
     # SHOCK TERM: self-steepening
@@ -364,7 +370,6 @@ def inoutplot(d,zparams={}):
     if 'fylim' in zparams.keys():
         plt.ylim(zparams['fylim'])
     plt.legend(["out","in"],loc=0)
-    print zparams.keys()
     ax3=plt.subplot(223)
     plt.imshow( np.abs(d['timefield'])**2,
                 aspect='auto',

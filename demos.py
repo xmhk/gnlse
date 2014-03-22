@@ -295,6 +295,9 @@ def compare_raman_response_functions():
     plt.show()
 
 def simple_losses_demo():
+    """
+    demo of simple, freqency-independent losses
+    """
     beta2 = -10.0e-27
     betas = [0,0,beta2]
     gamma = 2.100000e-02
@@ -333,10 +336,101 @@ def simple_losses_demo():
     e2 = np.sum(np.abs(d['tfield2']))**2*simparams['dt']
     print("energy in        : %.3e"%e1)
     print("energy out       : %.3e"%e2)
-    print("energy out (theo): %.3e"%e2theo)
-    
+    print("energy out (theo): %.3e"%e2theo)    
     #inoutplot(d,zparams={"fignr":5})
     plt.show()
+
+
+def freqdep_losses_demo():
+    """
+    simulates frequency dependent losses
+
+    this demonstrates the possibility to introduce freq-dep. losses.
+    the losses are given as a vector (unit 1/m).
+    
+    three simulations of a Nsol=1.0 soliton are performed:
+    1. loss-free case
+    2. theta-like losses for freqs > -2 THz with respect to the center
+    3. theta-like losses for freqs > 5 THz with respect to the center
+
+    the soliton spectrum partially overlaps with this losses and gets damped.
+    as the soliton is self-healing (see books of Mitschke or Agrawal), the center frequency
+    gets shifted: for 2. a blue shift, for 3. a red shift becomes visible
+    """
+
+    beta2 = -10.0e-27
+    betas = [0,0,beta2]
+    gamma = 2.100000e-02
+    T0 = .0250e-12
+    Nsol = 1.0
+    P = Nsol**2 * np.abs(beta2) / gamma / T0**2
+
+    zsol = np.pi/2.0 * T0**2/np.abs(beta2)
+    flength = 6.0
+    #
+    # initialize the grid
+    #
+    alpha1 = 0.0
+    simparams = prepare_sim_params(alpha1,betas ,1064.0e-9,gamma,flength,12,1.0,zpoints=200,
+                               integratortype='dopri5', reltol=1e-5,abstol=1e-8 , shock=False,
+                               raman = False)
+    #
+    # initial field
+    #
+    inifield = np.sqrt(P) * 1.0 / np.cosh( simparams['tvec']/T0) #higher order soliton
+    #
+    # theta func losses for freqs lower than -2 THz
+    #
+    alpha2 = -0.6 * ( simparams['relomvec']< -2 * 2e12 * np.pi)
+    simparams2 = prepare_sim_params(alpha2,betas ,1064.0e-9,gamma,flength,12,1.0,zpoints=200,
+                               integratortype='dopri5', reltol=1e-5,abstol=1e-8 , shock=False,
+                               raman = False)
+    #
+    # theta func losses for freqs hight than 5 THz
+    #
+    alpha3 = -0.6 * ( simparams['relomvec']> 5 * 2e12 * np.pi)
+    simparams3 = prepare_sim_params(alpha3,betas ,1064.0e-9,gamma,flength,12,1.0,zpoints=200,
+                               integratortype='dopri5', reltol=1e-5,abstol=1e-8 , shock=False,
+                               raman = False)
+
+    tf,ff,zv = perform_simulation( simparams, inifield)
+    saveoutput('loss2a.demo', tf, ff, zv, simparams)
+
+    tf,ff,zv = perform_simulation( simparams2, inifield)
+    saveoutput('loss2b.demo', tf, ff, zv, simparams)
+
+    tf,ff,zv = perform_simulation( simparams3, inifield)
+    saveoutput('loss2c.demo', tf, ff, zv, simparams)
+
+    da = loadoutput('loss2a.demo')
+    db = loadoutput('loss2b.demo')
+    dc = loadoutput('loss2c.demo')
+    plt.figure(1)
+    plt.subplot(311)
+
+    plt.plot( da['relomvec'], 10 * np.log10(np.abs(da['ffield1'])**2),color="#999999")
+    plt.plot( da['relomvec'], 10 * np.log10(np.abs(da['ffield2'])**2),color="#FF0000")
+    plt.plot( da['relomvec'], 10 * np.log10(np.abs(db['ffield2'])**2),color="#0000FF",linewidth=2)
+    plt.plot( da['relomvec'], 10 * np.log10(np.abs(dc['ffield2'])**2),color="#77FF00",linewidth=2)
+    plt.xlabel("angular frequency (rad/s)")
+    plt.ylabel("log. psd")
+    plt.legend(['in','out','LF losses','HF losses'])
+    plt.subplot(312)
+    plt.plot( da['relomvec'],np.abs(da['ffield1']),color="#999999")
+    plt.plot( da['relomvec'],np.abs(da['ffield2']),color="#FF0000")
+    plt.plot( da['relomvec'],np.abs(db['ffield2']),color="#0000FF",linewidth=2)
+    plt.plot( da['relomvec'],np.abs(dc['ffield2']),color="#77FF00",linewidth=2)
+    plt.ylabel("psd")
+    plt.xlabel("angular frequency (rad/s)")
+    plt.legend(['in','out','LF losses','HF losses'])
+    plt.subplot(313)
+    plt.plot( da['relomvec'],alpha2,color="#0000FF",linewidth=2)
+    plt.plot( da['relomvec'],alpha3,color="#77FF00",linewidth=2)
+    plt.xlabel("angular frequency (rad/s)")
+    plt.ylabel("loss (1/m)")
+    plt.legend(['LF loss curve','HF loss curve'],loc=0)
+    plt.show()
+
 
 # -------------------------------------------------------
 # choose between different demos
@@ -350,6 +444,6 @@ if __name__=='__main__':
     #soliton_self_frequency_shift_cancellation()
     #supercontinuumgeneration()
     #compare_raman_response_functions()
-    simple_losses_demo()
-
+    #simple_losses_demo()
+    freqdep_losses_demo()
     
