@@ -20,8 +20,8 @@ Rev 10, 22.03.2014
 * self-steepening
 * higher-order soliton
 * soliton self-frequency shift cancellation
-* supercontinuum generation
-* compare the different Raman response Models available (not actually a simulations but a temporal and spectral plot)
+* supercontinuum generation via soliton fission
+* compare the different Raman response models available (not actually a simulations but a temporal and spectral plot)
 * losses (simple, independent of frequency) 
 * frequency dependent losses (N=1 soliton center frequency changes)
 
@@ -39,7 +39,7 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
 
 ## basic usage:
 
-* please have a look at: **demos.py**
+* please have a look at **demos.py**
 
 1. use **prepare\_sim\_params()** to prepare a time and frequency grid; declare things like the fiber's dispersion, losses, the nonlinear effects that have to be considered,  etc 
 2. calculate your input field (in the time domain) 
