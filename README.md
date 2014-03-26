@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 11, 22.03.2014
+Rev 12, 26.03.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -103,34 +103,66 @@ integrates the gNLSE
   * a z-vector
 
 ### saveoutput(filename):
-save the output for later use
 
-* INPUT: 
-  * filename (a string)
-  * timefieldarray,
-  * freqfieldarray
-  * zvec
-  * simparams
+  saves the output (temporal and spectral field,
+        some simparams in one matlab-style file
+        
+        INPUT:
+        - filename
+        - timefieldarray
+        - freqfieldarray
+        - zvec
+        - simparams dict
+        
+        the saved dict will contain the following fields:
+        - tvec time vector
+        - omvec omega vector (absolute)
+        - relomvec omega vector (relative)
+        - om0 center frequency
+        - betacurve dispersion vector
+        - length fiber length
+        - zpoints number of z steps
+        - points time vector points
+        - timefield array of field (temporal domain)
+        - freqfielf array of field (spectral domain)
+        - zvec z vector
+        - tfield1, tfield2 in- and output field (temporal domain)
+        - ffield1, ffield2 in- and output field (spectral domain domain)
 
 ### loadoutput(filename)
-
-* INPUT: filename
-* OUTPUT: a python dictionary, containing the fields:
-  
-  * betacurve - the beta0 curve used in the simulation
-  * ffield1, ffield2 - in- and output fields (frequency domain)
-  * freqfield - the full frequency field array  
-  * length - fiber length
-  * om0 - center angular frequency
-  * omvec - the absolute angular frequency vector
-  * points - number of points in the temporal / spectral domain
-  * relomvev - the relative angular frequency vector
-  * tfield1, tfield2 - in- and output fields (time domain)
-  * timefield - the full time field array
-  * tvec - time axis vector
-  * zpoints - the number of z points
-  * zvec - the z axis vector
+ load output saved by 'saveoutput'
+        
+        INPUT:
+        - filename
+        
+        OUTPUT:
+        - a dictionary containing the fields:
+            - tvec time vector
+            - omvec omega vector (absolute)
+            - relomvec omega vector (relative)
+            - om0 center frequency
+            - betacurve dispersion vector
+            - length fiber length
+            - zpoints number of z steps
+            - points time vector points
+            - timefield array of field (temporal domain)
+            - freqfielf array of field (spectral domain)
+            - zvec z vector
+            - tfield1, tfield2 in- and output field (temporal domain)
+            - ffield1, ffield2 in- and output field (spectral domain domain)
 
 ### inoutplot
+   plot the input and output (both domains)
+        as well as temporal and spectral evolution
+        into one figure
+        
+        INPUT:
+        - d: dictionary created by 'loadoutput'
+        
+        OPTIONAL INPUT:
+        - zparams: dict that may contain the fields
+           - 'fignr':fignr
+           - 'clim':(cl1,cl2)    limit for colorcode (z) limits
+           - 'fylim':(fyl1,fyl2) y-limit for spectral plot
 
 ## Internal functions (you usually don't have to call by yourself)

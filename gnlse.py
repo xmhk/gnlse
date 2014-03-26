@@ -314,6 +314,28 @@ def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
     """
     saves the output (temporal and spectral field,
     some simparams in one matlab-style file
+    
+    INPUT:
+    - filename
+    - timefieldarray
+    - freqfieldarray
+    - zvec
+    - simparams dict
+
+    the saved dict will contain the following fields:
+    - tvec time vector
+    - omvec omega vector (absolute)
+    - relomvec omega vector (relative)
+    - om0 center frequency
+    - betacurve dispersion vector
+    - length fiber length
+    - zpoints number of z steps
+    - points time vector points
+    - timefield array of field (temporal domain)
+    - freqfielf array of field (spectral domain)
+    - zvec z vector
+    - tfield1, tfield2 in- and output field (temporal domain)
+    - ffield1, ffield2 in- and output field (spectral domain domain)
     """
     outputdict = {}
     outputdict['tvec'] = simparams['tvec']
@@ -338,6 +360,25 @@ def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
 def loadoutput(filename):
     """
     load output saved by 'saveoutput'
+
+    INPUT:
+    - filename
+    
+    OUTPUT:
+    - a dictionary containing the fields:
+        - tvec time vector
+        - omvec omega vector (absolute)
+        - relomvec omega vector (relative)
+        - om0 center frequency
+        - betacurve dispersion vector
+        - length fiber length
+        - zpoints number of z steps
+        - points time vector points
+        - timefield array of field (temporal domain)
+        - freqfielf array of field (spectral domain)
+        - zvec z vector
+        - tfield1, tfield2 in- and output field (temporal domain)
+        - ffield1, ffield2 in- and output field (spectral domain domain)
     """
     d = sio.loadmat(filename)
     for k in d.keys():
@@ -352,6 +393,16 @@ def inoutplot(d,zparams={}):
     plot the input and output (both domains)
     as well as temporal and spectral evolution
     into one figure
+    
+    INPUT:
+    - d: dictionary created by 'loadoutput'
+    
+    OPTIONAL INPUT:
+    - zparams: dict that may contain the fields
+       - 'fignr':fignr
+       - 'clim':(cl1,cl2)    limit for colorcode (z) limits
+       - 'fylim':(fyl1,fyl2) y-limit for spectral plot
+
     """
 
     if 'fignr' in zparams.keys():
