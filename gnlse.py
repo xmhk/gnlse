@@ -403,6 +403,9 @@ def inoutplot(d,zparams={}):
        - 'clim':(cl1,cl2)    limit for colorcode (z) limits
        - 'fylim':(fyl1,fyl2) y-limit for spectral plot
 
+
+    OUTPUT:
+    - ax1,ax2,ax3,ax4 handles of the four subfigures
     """
 
     if 'fignr' in zparams.keys():

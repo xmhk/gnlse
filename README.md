@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 12, 26.03.2014
+Rev 13, 14.04.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -164,5 +164,7 @@ integrates the gNLSE
            - 'fignr':fignr
            - 'clim':(cl1,cl2)    limit for colorcode (z) limits
            - 'fylim':(fyl1,fyl2) y-limit for spectral plot
+	OUTPUT:
+	- ax1,ax2,ax3,ax4 handles of the four subfigures
 
 ## Internal functions (you usually don't have to call by yourself)
