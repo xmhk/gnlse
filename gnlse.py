@@ -57,7 +57,7 @@ def prepare_sim_params( alpha,
     tvec = np.arange( -points/2, points/2) * dt
     relomvec = 2 * np.pi * np.arange (-points/2, points/2)/(points * dt)
     omvec = relomvec + om0
-    dz = length/zpoints    
+    dz = 1.0*length/zpoints    
     # -------------------------------------------------------
     # LINEAR OPERATOR: dispersion and losses 
     # -------------------------------------------------------
@@ -126,7 +126,7 @@ def prepare_sim_params( alpha,
     Retval['gamma']=gamma
     Retval['linop']=linop
     Retval['betacurve'] = bk
-    Retval['length']=length
+    Retval['length']=1.0 * length
     Retval['W'] = W
     Retval['dz']=dz
     Retval['zpoints']=zpoints    
