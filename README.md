@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 14, 09.05.2014
+Rev 15, 07.08.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -151,6 +151,34 @@ integrates the gNLSE
             - tfield1, tfield2 in- and output field (temporal domain)
             - ffield1, ffield2 in- and output field (spectral domain domain)
 
+
+### extract\_outfield\_from\_dict( outpdict )
+ 
+    extract only the output field (time, freq)
+    and the freq vectors from a dict created
+    by mydict  = loadoutput(filename)
+   
+    returns a Nx7 numpy.array
+
+### output\_field( M )
+
+    a quick way to get an output field 
+    from a numpy.array extract_outfield_from_dict
+
+    returns an OBJECT with the variables
+    
+    - self.tvec
+    - self.omvec
+    - self.relomvec
+    - self.nuvecthz
+    - self.tfield
+    - self.ffield
+    - self.Som   energy density (with respect to rad/s)
+    - self.Snu   energy density (with respect to Hz)
+
+
+
+
 ### inoutplot
    plot the input and output (both domains)
         as well as temporal and spectral evolution
@@ -168,3 +196,6 @@ integrates the gNLSE
 	- ax1,ax2,ax3,ax4 handles of the four subfigures
 
 ## Internal functions (you usually don't have to call by yourself)
+
+
+TDB - to be documented ;)

@@ -387,6 +387,68 @@ def loadoutput(filename):
             d[k]=d[k][0] #sio reconstructs cascaded arrays of (0,1)-arrays (somhow)    
     return d
 
+def extract_outfield_from_dict( outpdict ):
+    """ 
+    extract only the output field (time, freq)
+    and the freq vectors from a dict created
+    by mydict  = loadoutput(filename)
+   
+    returns a Nx7 numpy.array
+    """    
+
+    tvec  = outpdict['tvec']
+    omvec = outpdict['omvec']
+    relomvec = outpdict['relomvec']
+    tfieldreal = np.real(outpdict['tfield2'])
+    tfieldimag = np.imag(outpdict['tfield2'])
+    ffieldreal = np.real(outpdict['ffield2'])
+    ffieldimag = np.imag(outpdict['ffield2'])
+    M = np.zeros( [len( tvec), 7])
+    M[:,0]=tvec
+    M[:,1]=omvec
+    M[:,2]=relomvec
+    M[:,3]=tfieldreal
+    M[:,4]=tfieldimag
+    M[:,5]=ffieldreal
+    M[:,6]=ffieldimag
+    return M
+
+class output_field( ):
+    """ 
+    a quick way to get an output field 
+    from a numpy.array extract_outfield_from_dict
+
+    returns an OBJECT with the variables
+    
+    -self.tvec
+    -self.omvec
+    -self.relomvec
+    -self.nuvecthz
+    -self.tfield
+    -self.ffield
+    -self.Som   energy density (with respect to rad/s)
+    -self.Snu   energy density (with respect to Hz)
+    """
+
+    def __init__( self, M):
+        self.tvec = M[:,0]
+        self.omvec = M[:,1]
+        self.nuvecthz = self.omvec/2e12/np.pi
+        self.relomvec = M[:,2]
+        self.tfield = M[:,3] + 1.0j * M[:,4]
+        self.ffield = M[:,5] + 1.0j * M[:,6]
+        self.som = np.abs(self.ffield)**2
+        self.snu = self.som * np.pi * 2.0
+    def test(self):
+        dt = self.tvec[2]-self.tvec[1]
+        dom = self.omvec[2]-self.omvec[1]
+        dnu = dom /2./np.pi
+        print(" **** ")
+        print(" Zeitenergie : %.5e "%(np.sum( np.abs(self.tfield)**2)*dt))
+        print(" Freqnergie (om) : %.5e "%np.sum( self.som * dom))
+        print(" Freqnergie (nu) : %.5e "%np.sum( self.snu * dnu ))
+        
+
 
 def inoutplot(d,zparams={}): 
     """
@@ -414,13 +476,13 @@ def inoutplot(d,zparams={}):
         plt.figure(99)
     ax1=plt.subplot(221)
     plt.plot( d['tvec'], np.abs(d['tfield2'])**2)
-    plt.plot( d['tvec'], np.abs(d['tfield1'])**2,linewidth=3)
+    plt.plot( d['tvec'], np.abs(d['tfield1'])**2,linewidth=1)
     plt.legend(["out","in"],loc=0)
 
 
     ax2=plt.subplot(222)
     plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield2']))
-    plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield1']),linewidth=3)
+    plt.plot( d['omvec']/2.0/np.pi, db_abs2( d['ffield1']),linewidth=1)
     if 'fylim' in zparams.keys():
         plt.ylim(zparams['fylim'])
     plt.legend(["out","in"],loc=0)
