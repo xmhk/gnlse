@@ -39,7 +39,8 @@ def prepare_sim_params( alpha,
                         reltol = 1e-6,
                         abstol = 1e-9,
                         integratortype = 'dopri5',
-                        zpoints = 256):
+                        zpoints = 256,
+                        statusmsg = True):
     """
     prepare_simparams
     
@@ -134,6 +135,7 @@ def prepare_sim_params( alpha,
     Retval['abstol']=abstol
     Retval['nsteps']=nsteps
     Retval['integratortype']=integratortype
+    Retval['statusmsg']=statusmsg
     return Retval
 
     
@@ -155,7 +157,8 @@ def perform_simulation( simparameters, inifield):
     scalefak = np.sqrt( simparameters['dt'] / simparameters['dom'] * simparameters['points'] )
     freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
     for i in range(simparameters['zpoints']):
-        instatus( integr.t, slength, startingtime)
+        if simparameters['statusmsg']:
+            instatus( integr.t, slength, startingtime)
         integr.integrate(integr.t + simparameters['dz'])
         zvec.append(integr.t)        
         freqfield = np.multiply ( integr.y , np.exp(simparameters['linop'] * (integr.t) ))
@@ -367,7 +370,7 @@ def loadoutput(filename):
     OUTPUT:
     - a dictionary containing the fields:
         - tvec time vector
-        - omvec omega vector (absolute)
+        - omvec omega vector (absolute)x
         - relomvec omega vector (relative)
         - om0 center frequency
         - betacurve dispersion vector
