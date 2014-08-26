@@ -84,9 +84,9 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
       * 'dopri5'
       * 'lsoda'
       * 'vode'
-  * givestatus=True|False  - print current and remaining time for calculation (standard is true)
-    
-      see [corresponding section in the scipy docs](http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html#scipy.integrate.ode). Standard is dopri5
+       see [corresponding section in the scipy docs](http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html#scipy.integrate.ode). Standard is dopri5
+
+ * givestatus=True|False  - print current and remaining time for calculation (standard is true)
 
 * output:
   * a simparams dict
