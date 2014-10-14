@@ -313,11 +313,78 @@ def raman_hollenbeck(tvec):
 # 4. INPUT AND OUTPUT 
 # -----------------------------------------------------------------------------
 
+
+def prepare_output_dict( timefieldarray,freqfieldarray,zvec, simparams):
+    """
+    prepare an output dict for saving
+    
+    INPUT:
+    - timefieldarray
+    - freqfieldarray
+    - zvec
+    - simparams dict
+
+    the dict will contain the following fields:
+    - tvec time vector
+    - omvec omega vector (absolute)
+    - relomvec omega vector (relative)
+    - om0 center frequency
+    - betacurve dispersion vector
+    - length fiber length
+    - zpoints number of z steps
+    - points time vector points
+    - timefield array of field (temporal domain)
+    - freqfielf array of field (spectral domain)
+    - zvec z vector
+    - tfield1, tfield2 in- and output field (temporal domain)
+    - ffield1, ffield2 in- and output field (spectral domain domain)
+    """
+    outputdict = {}
+    outputdict['tvec'] = simparams['tvec']
+    outputdict['omvec']=simparams['omvec']
+    outputdict['relomvec']=simparams['relomvec']
+    outputdict['om0'] = simparams['om0']
+    outputdict['betacurve'] = simparams['betacurve']
+    outputdict['length']=simparams['length']
+    outputdict['zpoints']=simparams['zpoints']
+    outputdict['points']=simparams['points']
+    
+    outputdict['timefield']=timefieldarray
+    outputdict['freqfield']=freqfieldarray
+    outputdict['zvec']=zvec
+
+    outputdict['tfield1'] = timefieldarray[0,:]
+    outputdict['ffield1'] = freqfieldarray[0,:]
+    outputdict['tfield2'] = timefieldarray[simparams['zpoints'],:]
+    outputdict['ffield2'] = freqfieldarray[simparams['zpoints'],:]
+
+    return outputdict
+
 def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
+    
+    outputdict = prepare_output_dict( timefieldarray,freqfieldarray,zvec, simparams)
+    sio.savemat( filename , outputdict)
     """
     saves the output (temporal and spectral field,
     some simparams in one matlab-style file
     
+    INPUT:
+    - filename
+    - timefieldarray
+    - freqfieldarray
+    - zvec
+    - simparams dict
+    """
+
+
+def saveoutput2(filename, timefieldarray,freqfieldarray,zvec, simparams):
+    """
+    saves the output (temporal and spectral field,
+    some simparams in one matlab-style file
+    
+    THIS IS DEPRICATED, the function was split into prepare_output_dict
+    and saveoutput 
+
     INPUT:
     - filename
     - timefieldarray

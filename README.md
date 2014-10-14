@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 16, 26.08.2014
+Rev 17, 14.10.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
