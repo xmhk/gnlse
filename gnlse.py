@@ -361,9 +361,6 @@ def prepare_output_dict( timefieldarray,freqfieldarray,zvec, simparams):
     return outputdict
 
 def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
-    
-    outputdict = prepare_output_dict( timefieldarray,freqfieldarray,zvec, simparams)
-    sio.savemat( filename , outputdict)
     """
     saves the output (temporal and spectral field,
     some simparams in one matlab-style file
@@ -374,7 +371,10 @@ def saveoutput(filename, timefieldarray,freqfieldarray,zvec, simparams):
     - freqfieldarray
     - zvec
     - simparams dict
-    """
+    """ 
+    outputdict = prepare_output_dict( timefieldarray,freqfieldarray,zvec, simparams)
+    sio.savemat( filename , outputdict)
+   
 
 
 def saveoutput2(filename, timefieldarray,freqfieldarray,zvec, simparams):
