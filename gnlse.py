@@ -40,7 +40,8 @@ def prepare_sim_params( alpha,
                         abstol = 1e-9,
                         integratortype = 'dopri5',
                         zpoints = 256,
-                        statusmsg = True):
+                        statusmsg = True,
+                        status_update_intv=1):
     """
     prepare_simparams
     
@@ -136,6 +137,7 @@ def prepare_sim_params( alpha,
     Retval['nsteps']=nsteps
     Retval['integratortype']=integratortype
     Retval['statusmsg']=statusmsg
+    Retval['status_update_intv']=status_update_intv
     return Retval
 
     
@@ -158,7 +160,8 @@ def perform_simulation( simparameters, inifield):
     freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
     for i in range(simparameters['zpoints']):
         if simparameters['statusmsg']:
-            instatus( integr.t, slength, startingtime)
+            if i%int(simparameters['status_update_intv'])==0:
+                instatus( integr.t, slength, startingtime)
         integr.integrate(integr.t + simparameters['dz'])
         zvec.append(integr.t)        
         freqfield = np.multiply ( integr.y , np.exp(simparameters['linop'] * (integr.t) ))

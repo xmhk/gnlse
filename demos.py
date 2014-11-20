@@ -35,7 +35,8 @@ def ramanshift_long():
                                reltol=1e-3, 
                                abstol=1e-6 ,
                                shock=False,
-                               raman = True)
+                               raman = True,
+                               status_update_intv=50)
     inifield = np.sqrt(P) * 1.0 / np.cosh( (simparams['tvec']+1e-12)/T0)
     tf,ff,zv = perform_simulation( simparams, inifield)
     saveoutput('raman.demo', tf, ff, zv, simparams)
@@ -77,7 +78,8 @@ def self_steepening():
                                reltol=1e-6, 
                                abstol=1e-12 ,
                                shock=True,
-                               raman = False)
+                               raman = False,
+                               status_update_intv=50)
     s = 0.01 #self-steepening factor
     T0 = 1/s/simparams['om0']
     inifield = np.sqrt(P) * np.exp( -0.5* (simparams['tvec']/1.0/T0)**2)  #gaussian field
@@ -127,7 +129,8 @@ def higher_order_soliton(Nsol):
                                reltol=1e-6, 
                                abstol=1e-12 ,
                                shock=False,
-                               raman = False)
+                               raman = False,
+                               status_update_intv=50)
     inifield = np.sqrt(P) * 1.0 / np.cosh( simparams['tvec']/T0) #higher order soliton
 
     tf,ff,zv = perform_simulation( simparams, inifield)
@@ -373,7 +376,7 @@ def freqdep_losses_demo():
     alpha1 = 0.0
     simparams = prepare_sim_params(alpha1,betas ,1064.0e-9,gamma,flength,12,1.0,zpoints=200,
                                integratortype='dopri5', reltol=1e-5,abstol=1e-8 , shock=False,
-                               raman = False)
+                                   raman = False,   status_update_intv=50)
     #
     # initial field
     #
@@ -384,14 +387,14 @@ def freqdep_losses_demo():
     alpha2 = -0.6 * ( simparams['relomvec']< -2 * 2e12 * np.pi)
     simparams2 = prepare_sim_params(alpha2,betas ,1064.0e-9,gamma,flength,12,1.0,zpoints=200,
                                integratortype='dopri5', reltol=1e-5,abstol=1e-8 , shock=False,
-                               raman = False)
+                                    raman = False  , status_update_intv=50)
     #
     # theta func losses for freqs hight than 5 THz
     #
     alpha3 = -0.6 * ( simparams['relomvec']> 5 * 2e12 * np.pi)
     simparams3 = prepare_sim_params(alpha3,betas ,1064.0e-9,gamma,flength,12,1.0,zpoints=200,
                                integratortype='dopri5', reltol=1e-5,abstol=1e-8 , shock=False,
-                               raman = False)
+                                    raman = False,   status_update_intv=50)
 
     tf,ff,zv = perform_simulation( simparams, inifield)
     saveoutput('loss2a.demo', tf, ff, zv, simparams)

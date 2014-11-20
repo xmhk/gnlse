@@ -1,6 +1,6 @@
 gnlse
 =====
-Rev 17, 14.10.2014
+Rev 18, 20.11.2014
 
  * a python script to simulate the propagation of pulses in optical fibers
  * the generalized Nonlinear Schroedinger Equation (gNLSE) is modeled 
@@ -77,6 +77,8 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
       * hollenbeck models the experimental data quite accureate. fr should be around 0.2
   * shock term True/False - include shock term? Default False
   * nsteps - maximum number of steps for one ode-integration (standard 500)
+  * statusmsg: whether to show status True/False 
+  * status\_update\_intv : when statusmsg == True, print status only every nth step (n=status\_update\_intv)
   * reltol - ode-solver relative accuracy parameter (standard 1e-6)
   * abstol - ode-solver absolute accuracy parameter (standard 1e-9)
   * integratortype: choose one of
@@ -86,7 +88,6 @@ have a look at [http://www.scipy.org/](http://www.scipy.org/) and grab the laste
       * 'vode'
        see [corresponding section in the scipy docs](http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html#scipy.integrate.ode). Standard is dopri5
 
- * givestatus=True|False  - print current and remaining time for calculation (standard is true)
 
 * output:
   * a simparams dict
