@@ -443,10 +443,10 @@ def freqdep_losses_demo():
 if __name__=='__main__':
     #ramanshift_long()
     #self_steepening()
-    #higher_order_soliton(4.0)
+    higher_order_soliton(2.0)
     #soliton_self_frequency_shift_cancellation()
     #supercontinuumgeneration()
     #compare_raman_response_functions()
     #simple_losses_demo()
-    freqdep_losses_demo()
+    #freqdep_losses_demo()
     

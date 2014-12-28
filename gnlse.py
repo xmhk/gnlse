@@ -453,13 +453,9 @@ def loadoutput(filename):
         - tfield1, tfield2 in- and output field (temporal domain)
         - ffield1, ffield2 in- and output field (spectral domain domain)
     """
-    d = sio.loadmat(filename)
-    for k in d.keys():
-        if k not in ('__header__','__globals__','__version__','timefield','freqfield'):
-            #print k
-            d[k]=d[k][0] #sio reconstructs cascaded arrays of (0,1)-arrays (somhow)    
+    d=sio.loadmat(filename,squeeze_me=True) #*.mat can only store 2D arrays, squeeze_me is for flattening (vectors)
     return d
-
+    
 def extract_outfield_from_dict( outpdict ):
     """ 
     extract only the output field (time, freq)
