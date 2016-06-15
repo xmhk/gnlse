@@ -620,7 +620,7 @@ def instatus( aktl, slength, startingtime ):
 		print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
 		
 def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev):
-	"""
+	""" 
 	just a simple implementation of the split step fourier method
 	for testing puposes
 	
@@ -638,28 +638,27 @@ def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev):
 	OUTPUT:
 			- fm: matrix of field
 			- zv: z vector for field
-	
 	"""
-    h = length / zpoints
-    dt = tvec[2]-tvec[1]
-    relomvec = 2 * np.pi *  np.fft.fftfreq( len(tvec), d=dt)#    
-    linop = np.exp( h/2. * 1.0j * b2/2. * relomvec**2)    
-    feldm = []
-    lv = len(relomvec)
-    feldm.append( feld[0:lv:xev])
-    zvec = [0.0]
-    z = 0
-    for i in range(1, zpoints+1):
-        ofeld = np.fft.ifft(feld)
-        ofeld = ofeld * linop
-        feld = np.fft.fft(ofeld)
-        nop = np.exp(1.0j * h * gamma * np.abs(feld)**2)
-        feld = feld * nop
-        ofeld = np.fft.ifft(feld)
-        ofeld = ofeld * linop
-        feld = np.fft.fft(ofeld)        
-        z+=h
-        if i%zev == 0:
-            zvec.append(z)
-            feldm.append(feld[0:lv:xev])
-    return np.array(zvec), np.array(feldm)		
+	h = length / zpoints
+	dt = tvec[2]-tvec[1]
+	relomvec = 2 * np.pi *	np.fft.fftfreq( len(tvec), d=dt)#	 
+	linop = np.exp( h/2. * 1.0j * b2/2. * relomvec**2)	  
+	feldm = []
+	lv = len(relomvec)
+	feldm.append( feld[0:lv:xev])
+	zvec = [0.0]
+	z = 0
+	for i in range(1, zpoints+1):
+		ofeld = np.fft.ifft(feld)
+		ofeld = ofeld * linop
+		feld = np.fft.fft(ofeld)
+		nop = np.exp(1.0j * h * gamma * np.abs(feld)**2)
+		feld = feld * nop
+		ofeld = np.fft.ifft(feld)
+		ofeld = ofeld * linop
+		feld = np.fft.fft(ofeld)		
+		z+=h
+		if i%zev == 0:
+			zvec.append(z)
+			feldm.append(feld[0:lv:xev])
+	return np.array(zvec), np.array(feldm)		
