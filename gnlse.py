@@ -619,13 +619,14 @@ def instatus( aktl, slength, startingtime ):
 		trem = (1-frac)*tel/frac
 		print("%.4f m / %.4f m (%.1f%%) | %.0f s | %.0f s (%.2f h)"%(aktl,slength,frac*100, tel,trem,trem/3600.))
 		
-def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev):
+		
+def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev, alpha=0.0):
 	""" 
 	just a simple implementation of the split step fourier method
 	for testing puposes
 	
 	usage:
-	fm, zv = simpleSSFM(b2,field, gamma,length,tvec,zpoints, xev, zev)
+	fm, zv = simpleSSFM(b2,field, gamma,length,tvec,zpoints, xev, zev, alpha=0.0)
 	
 	INPUT: - b2 beta2 GVD parameter
 		   - field: numerical input field
@@ -634,6 +635,8 @@ def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev):
 		   - tvec time vector
 		   - zpoints discretization points in z
 		   - xev, zev: sampling parameters (x-every, y-every)
+		   
+		   - optional parameter: alpha	   (loss / gain parameter)
 	
 	OUTPUT:
 			- fm: matrix of field
@@ -642,7 +645,7 @@ def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev):
 	h = length / zpoints
 	dt = tvec[2]-tvec[1]
 	relomvec = 2 * np.pi *	np.fft.fftfreq( len(tvec), d=dt)#	 
-	linop = np.exp( h/2. * 1.0j * b2/2. * relomvec**2)	  
+	linop = np.exp( h/2. *( 1.0j * b2/2. * relomvec**2 + alpha/2.))	  
 	feldm = []
 	lv = len(relomvec)
 	feldm.append( feld[0:lv:xev])
@@ -661,4 +664,5 @@ def simpleSSFM(b2,feld, gamma,length,tvec,zpoints, xev, zev):
 		if i%zev == 0:
 			zvec.append(z)
 			feldm.append(feld[0:lv:xev])
-	return np.array(zvec), np.array(feldm)		
+	return np.array(zvec), np.array(feldm)			
+  
