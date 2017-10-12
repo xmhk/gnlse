@@ -1,4 +1,4 @@
-
+	
 
 import numpy as np
 from functools import partial as funcpartial
@@ -7,7 +7,7 @@ from scipy.integrate import complex_ode
 from time import time
 import scipy.io as sio
 from matplotlib import pyplot as plt	# you only need this for 'inoutplot'
-from optictools import db_abs, db_abs2	# like matplotlib, optictools can be found on github/xmhk
+from mytools import db_abs, db_abs2	# like matplotlib, optictools can be found on github/xmhk
 
 # -----------------------------------------------------------------------------
 # CODE OVERVIEW:
@@ -94,6 +94,7 @@ def prepare_sim_params( alpha,
 		W = omvec / om0
 		#
 		W = np.fft.fftshift(W)
+		
 	# -------------------------------------------------------
 	# Raman response function
 	# -------------------------------------------------------
@@ -173,6 +174,39 @@ def perform_simulation( simparameters, inifield):
 	return timefieldarray, np.array(freqfieldlist2) ,zvec
 
 
+def perform_simulation_step( simparameters, inifield):	
+	"""
+	integrate the propagation using a scipy ode solver 
+	"""
+	integr = prepare_integrator( simparameters, inifield)
+	zvec = []
+	#freqfieldlist = []
+	#freqfieldlist2 = []
+	startingtime = time()
+	slength = simparameters['length']
+	zvec.append(0)
+	#freqfieldlist.append(np.fft.ifft( inifield))
+	#
+	# the fft scalingfactor ensures that the energy is conserved in both domains
+	#
+	scalefak = np.sqrt( simparameters['dt'] / simparameters['dom'] * simparameters['points'] )
+	#freqfieldlist2.append(np.fft.fftshift(np.fft.ifft(inifield)) *scalefak)
+	for i in range(simparameters['zpoints']):
+		if simparameters['statusmsg']:
+			if i%int(simparameters['status_update_intv'])==0:
+				instatus( integr.t, slength, startingtime)
+		integr.integrate(integr.t + simparameters['dz'])
+		zvec.append(integr.t)		 
+		freqfield = np.multiply ( integr.y , np.exp(simparameters['linop'] * (integr.t) ))
+		#freqfieldlist.append(freqfield)
+		#freqfieldlist2.append(np.fft.fftshift(freqfield) * scalefak)
+	del integr
+	timefield =np.fft.fft(freqfield)
+	#print("verlasse step")
+	return timefield ,zvec
+
+
+	
 
 # -----------------------------------------------------------------------------
 # 2. CORE SIMULATION
